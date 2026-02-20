@@ -59,7 +59,7 @@ Agent A's landscape          Agent B's landscape
 
 These three terms are used consistently throughout this document. "Vector" alone refers to a directional influence; "vector space" refers to the agent's internal containment capacity, not a mathematical vector space in the linear algebra sense.
 
-In this document, "vector field" denotes interaction-induced directional influence in an abstract state space; no differentiability or linear structure is assumed.
+Vector field is the externalized interaction footprint of an agent's vector orientation. In this document, "vector field" denotes interaction-induced directional influence in an abstract state space; no differentiability or linear structure is assumed.
 
 ### 1.2 Core Definition
 
@@ -99,9 +99,10 @@ Stage 0: Local friction
   No propagation. Self-resolves through natural decay.
   → Intervention: none required.
 
-Stage 1: Directional oscillation
+Stage 1: Local runaway
   Reinforcement exceeds decay, but remains localized.
-  Agent oscillates between orientations without convergence.
+  Agent may oscillate between orientations without convergence.
+  Oscillation is one common manifestation, not the defining feature.
   → Intervention: restore self-objectification signals
     (e.g., via metadata injection).
 
@@ -139,9 +140,9 @@ Conflict detected
 
 **Why self-reinforcement is the default response**
 
-An agent that has converged toward a local optimum has formed an attractor. When an external vector influence arrives that conflicts with this attractor, the attractor's gradient structure naturally pushes the agent to deepen its current orientation — not to accommodate the incoming vector.
+An agent that has converged toward a local optimum has formed an attractor. When an external vector influence arrives that conflicts with this attractor, the attractor's basin dynamics naturally push the agent to deepen its current orientation — not to accommodate the incoming vector.
 
-This is not a design flaw. It is the expected behavior of any optimization process near a local optimum: the gradient points inward, reinforcing the current solution. Accommodation requires the agent to escape its attractor basin, which demands energy that exceeds the local gradient — a structurally unlikely event without external mediation.
+This is not a design flaw. It is the expected behavior of any optimization process near a local optimum: the basin dynamics point inward, reinforcing the current solution. Accommodation requires the agent to escape its attractor basin, which demands energy that exceeds the local restoring force — a structurally unlikely event without external mediation.
 
 ```
 Mature vector space:
@@ -151,7 +152,7 @@ Mature vector space:
 Immature vector space:
   External vector arrives → space cannot hold divergent directions
   → Friction begins immediately
-  → Agent's attractor gradient reinforces current orientation
+  → Agent's basin dynamics reinforce current orientation
   → Defensive self-strengthening → amplification loop begins
 ```
 
@@ -165,7 +166,7 @@ Within a fractal governance structure, all agents possess vector spaces, but cap
 |-------|-----------------|-----------------|
 | Upper | Policy containment | Define invariants and boundary seeds |
 | Middle | Operational containment | Degrade, mediate, and route vectors |
-| Lower | Limited containment | Perform local optimization |
+| Lower | Minimal containment (local-only, cutoff-dominant) | Perform local optimization |
 
 ```
 Middle layer (mature vector space)
@@ -259,7 +260,7 @@ Path 3: Gradual Dilution
 ```
 
 > **Contamination in a layered accumulation structure is structural, not surgical.**
-> **No general-purpose undo is known under this accumulation model — only suppress, rebuild, or dilute.**
+> **Under this accumulation model, no general-purpose undo is known — only suppress, rebuild, or dilute.**
 
 The contamination problem explains why **preventive design** (ensuring vectors are properly degraded before entering immature spaces) is fundamentally more efficient than any post-hoc correction. The cost asymmetry between prevention and correction is not linear — it is structural.
 
@@ -313,6 +314,8 @@ $$C(t) < \frac{\alpha}{\beta} \cdot n^2 \implies \text{Vector Storm risk increas
 
 The central insight: instability grows when degradation capacity fails to scale proportionally with exploration diversity.
 
+Here, "threshold" refers to the regime where self-amplification dominates local decay and begins to propagate (Stage 2 onset). The precise boundary is left for calibration (Section 11).
+
 ### 3.3 The Residual Degradation Floor
 
 Vector Storm theory defines instability as the result of insufficient degradation capacity. This raises a deeper question: can degradation capacity reach 100%? Can a sufficiently developed system fully eliminate residual friction?
@@ -362,7 +365,7 @@ Cost
 > This expresses a **qualitative tradeoff** rather than a precise optimization formula.
 > An optimal intervention point $t^*$ exists where total cost is minimized.
 
-The storm stages (Section 1.4) interact with this tradeoff directly: intervention at Stage 0–1 corresponds to early, low-cost intervention; intervention at Stage 2–3 corresponds to late, high-cost intervention. The optimal $t^*$ typically falls within the Stage 1 window.
+The storm stages (Section 1.4) interact with this tradeoff directly: intervention at Stage 0–1 corresponds to early, low-cost intervention; intervention at Stage 2–3 corresponds to late, high-cost intervention. The optimal $t^*$ typically falls within the Stage 1 interval.
 
 ---
 
@@ -379,7 +382,7 @@ Local attractor activated
             └→ Propagation across network
 ```
 
-This produces two storm pathways:
+Once intensity dominates evaluation, propagation follows two main pathways:
 
 - **Direct collision** — Competing vector fields intersect locally
 - **Network propagation** — Strong attractors propagate through hubs and override weaker structures
@@ -447,7 +450,7 @@ Self-purification capacity is a function of vector space maturity. Growing this 
 
 ### 6.2 Metadata Injection for Self-Objectification
 
-Self-purification requires self-objectification — which, as established in Section 2.3, is difficult to generate purely locally at lower layers. The middle layer's primary ongoing function is **periodic metadata injection** into lower agents.
+Self-purification requires self-objectification — which, as established in Section 2.3, is difficult to generate purely locally at lower layers. One central ongoing function of the middle layer is **periodic metadata injection** into lower agents.
 
 Injected metadata contains three components:
 
@@ -516,7 +519,7 @@ Noise ──[Attracting]──► Vector ──[if misaligned]──► Noise
                                  [if aligned]──► Stable attractor
 ```
 
-The cycle runs continuously. The system perpetually reclassifies signals between noise and vector without requiring external intervention. At the limit, classification decisions can be interpreted as attracting- or distracting-dominant operations — connecting this cycle to the four-type data classification described in Network Architecture Theory.
+The cycle runs continuously. The system perpetually reclassifies signals between noise and vector without requiring external intervention. At the limit, routing-relevant classification decisions can be interpreted as attracting- or distracting-dominant operations — connecting this cycle to the four-type data classification described in Network Architecture Theory.
 
 > Attracting builds structure from randomness.
 > Distracting dissolves misaligned structure back into randomness.
@@ -526,9 +529,9 @@ The cycle runs continuously. The system perpetually reclassifies signals between
 
 Attracting and distracting are not symmetric operations. **Distracting is structurally more expensive than attracting.**
 
-Attracting draws unstructured signals into an existing basin — the attractor does most of the work. The signal is pulled in by the gradient; minimal active effort is required.
+Attracting draws unstructured signals into an existing basin — the attractor does most of the work. The signal is pulled in by the basin dynamics; minimal active effort is required.
 
-Distracting must dissolve an already-formed vector — one that has an established gradient, a reinforcement history, and possibly accumulated metadata built on top of it. Breaking this structure requires energy that exceeds the attractor's holding force.
+Distracting must dissolve an already-formed vector — one that has an established reinforcement history and possibly accumulated metadata built on top of it. Breaking this structure requires energy that exceeds the attractor's holding force.
 
 ```
 Attracting:  Pull unstructured signal into basin → low energy
@@ -539,7 +542,7 @@ Cost ratio:  Distracting >> Attracting
 
 This asymmetry has a critical design implication: **preventing misaligned vectors from forming in the first place (through proper degradation before absorption) is fundamentally cheaper than dissolving them after they have been integrated.** This is the economic basis for the preventive design principle articulated throughout this framework.
 
-The asymmetry also explains why the contamination problem (Section 2.4) is so severe: once a contaminated vector becomes load-bearing in the accumulation structure, distracting it requires not just overcoming the vector's own gradient but also reconstructing everything built on top of it.
+The asymmetry also explains why the contamination problem (Section 2.4) is so severe: once a contaminated vector becomes load-bearing in the accumulation structure, distracting it requires not just overcoming the vector's own restoring force but also reconstructing everything built on top of it.
 
 ### 7.2 Switching Trigger
 
@@ -571,7 +574,7 @@ This model operates under the following simplifying assumptions:
 |---|------------|
 | 1 | Agents optimize locally, not globally. |
 | 2 | Vector fields are neutral; instability arises from conflict between incompatible orientations. |
-| 3 | Conflict triggers self-reinforcement as the default response, because attractor gradients point inward. |
+| 3 | Conflict triggers self-reinforcement as the default response, because attractor basin dynamics point inward. |
 | 4 | Degradation capacity (vector space maturity) varies by hierarchical layer, distinguished as policy containment (upper) and operational containment (middle). |
 | 5 | Lower agents lack sufficient self-objectification capacity; this typically requires periodic metadata injection from upper layers. |
 | 6 | Vector space is a layered accumulation structure; pinpoint removal of contaminated vectors is not reliably achievable without collateral damage. |
@@ -703,7 +706,7 @@ The multi-agent resolution architecture (Section 6) maps to single-agent interna
 |----------------------|----------------------|
 | Self-purification | Attention head self-resolves conflict within its pattern space |
 | Escalation to deeper layers | Unresolved representation propagates from early to late Transformer layers |
-| Metadata injection | Context propagation channels (e.g., residual pathways, layer normalization) |
+| Metadata injection | Context propagation channels (e.g., residual pathways; normalization as stabilizing context alignment) |
 | Attracting/Distracting cycle | Attention score adjustment: strengthen relevant tokens, suppress irrelevant ones |
 | Processing isolation | Multi-head independence: heads do not exchange intermediate states |
 
@@ -797,10 +800,3 @@ A system that has experienced a full Vector Storm often enters a post-storm stat
 ---
 
 *This theory draws on cross-domain synthesis across organizational theory, immune system dynamics, and complex systems science.*
-
-The governance challenge is not storm elimination, but maintaining:
-
-$$\text{Growth Benefit} > \text{Instability Cost}$$
-
-> **Governance is not the absence of storm.**
-> **It is the capacity to grow through it.**
