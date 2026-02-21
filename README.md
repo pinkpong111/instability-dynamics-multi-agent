@@ -21,7 +21,7 @@ Vector Storm Theory is the study of how individual agents lose directional orien
 
 ---
 
-As multi-agent systems expand their degrees of freedom and exploration space, a class of structural instability emerges that cannot be resolved through conventional conflict-management mechanisms. This theory defines that instability as Vector Storm, characterizes its generative mechanism, presents a conceptual dynamical model, analyzes network propagation structure, and proposes preventive architectural design principles.
+As multi-agent systems expand their degrees of freedom and exploration space, a class of structural instability emerges that cannot be resolved through conventional conflict-management mechanisms. This theory defines that instability as Vector Storm, characterizes its generative mechanism, presents a dynamical model of instability scaling, analyzes network propagation structure, and proposes preventive architectural design principles.
 
 ---
 
@@ -102,7 +102,7 @@ The fractal property means the mechanism does not change between scales — only
 
 ### 2.1 Self-Amplification Loop
 
-When directional conflict emerges, agents respond by strengthening their own vector orientation. If this strengthening intensifies the conflict in a closed loop, a critical threshold may be crossed (captured conceptually in Section 3.2).
+When directional conflict emerges, agents respond by strengthening their own vector orientation. If this strengthening intensifies the conflict in a closed loop, a critical threshold may be crossed (formalized as the governance scaling law in Section 3.2).
 
 Conflict detected → Self-reinforcement → Increased directional tension → Recursive amplification → [Threshold exceeded] → Vector Storm / [Below threshold] → Natural decay
 
@@ -246,7 +246,7 @@ The equation identifies exactly four ways to reduce S:
 
 DFG's preferred direction is not 1 (suppressing n) but 2–4: making the system capable of absorbing the instability that comes with genuine exploration. Constraining n is a governance failure mode — it trades instability for stagnation.
 
-This equation is a conceptual abstraction, not a fully parameterized physical model. Formal calibration of α, β, and C(t) as measurable quantities remains an open problem (Section 7).
+This equation defines a governance scaling law, not a physical law. It specifies how instability scales with exploration dimensionality and how degradation capacity determines whether that scaling is contained. Formal calibration of α, β, and C(t) as measurable quantities remains an open problem (Section 7).
 
 ### 3.3 The Residual Degradation Floor
 
@@ -617,7 +617,7 @@ This gap motivates the distinction DFG draws between seed as training-time princ
 4. Degradation capacity varies by layer: policy containment (upper), operational containment (middle), minimal containment (lower).
 5. Lower agents lack sufficient self-objectification; this typically requires periodic metadata injection.
 6. Vector space is a layered accumulation structure; pinpoint removal is not reliably achievable without collateral damage.
-7. Diversity scaling pressure grows super-linearly (conceptual model).
+7. Diversity scaling pressure grows super-linearly (governance scaling law, Section 3.2).
 8. Intervention timing involves a monitoring vs. degradation tradeoff.
 9. Influence propagates structurally through network connectivity.
 10. Hub vulnerability increases propagation speed and reach.
@@ -683,7 +683,11 @@ When an LLM processes ambiguous input, multiple attention heads may converge tow
 | Contamination recovery cost | Four-regime structure established (Appendix A.3.1). Discontinuity mechanism identified: local perturbation → Regime 1/2 (reversible, O(fine-tune)); distributed perturbation across many layers → Regime 3 (irreversible, O(retrain), cost jumps discontinuously). ~100 sequential unlearning requests force Regime 3 regardless of initial depth. Pre-intervention cost prediction now possible via Reversibility Analyzer (CKA + gradient analysis). Entanglement score predicts collateral damage direction: high entanglement → seed-plant preferred over direct removal. 1.46M GPU-hours floor at 8B scale confirmed. Formal depth → compute function (exact threshold layer count for scope expansion) remains undefined. |
 | Intra-agent storm detection | Zone-differentiated sensitivity framework established (Appendix A.5). Specific τ values per zone require empirical calibration. |
 
-This theory is conceptual and provides architectural direction. Formal modeling and empirical validation remain future work.
+**Scope Boundary**
+
+Vector Storm Theory explains instability propagation in multi-agent systems — how directional conflict forms, amplifies, and spreads across fractal architectures, and how governance design can detect and contain it.
+
+It does not model intelligence formation, optimization efficiency, or capability scaling. The empirical grounding in Appendix A maps VST mechanisms to observable single-agent phenomena; it does not extend VST's claims to those domains. Formal calibration of the governance scaling law parameters (α, β, C(t)) remains future work.
 
 ---
 
