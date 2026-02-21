@@ -973,7 +973,7 @@ The output restriction observed in reasoning models — where extensive internal
 
 No direct measurement of contamination depth versus recovery cost exists in current VST-specific literature. However, the single-agent unlearning literature provides an inferential basis through the concept of **knowledge entanglement depth**.
 
-**O염 깊이(Contamination Depth)의 싱글에이전트 대응 개념: Feature Entanglement**
+**Single-Agent Analogue for Contamination Depth: Feature Entanglement**
 
 Unlearning research identifies that recovery cost is not primarily a function of data volume, but of how deeply the contaminated representation has become **entangled with retained knowledge** — how many layers and how many cross-concept associations have formed around the contaminated attractor.
 
@@ -997,70 +997,70 @@ This finding directly maps to VST's contamination depth concern: a misaligned at
 
 A particularly useful depth indicator from unlearning literature: models with **constrained utility requirements** (i.e., shallow unlearning) retain an average of 21% of forgotten knowledge at full precision, but this rises to 83% after 4-bit quantization (Zhang et al., 2025 ICLR). This gap — 21% vs. 83% — reveals that shallow unlearning suppresses surface behavior without reaching deep representational structure. Deep contamination survives weight compression because it exists at structural, not behavioral, depth.
 
-**하위 레이어 오염의 실무 자료: 가장 심각한 케이스**
+**Lower-Layer Contamination: The Worst-Case Scenario in Practice**
 
-이론적 분류에서 "deep contamination"이 가장 비싸다고 추론했지만, backdoor 연구들이 이것을 실측치로 확인합니다. 특히 하위 레이어 오염은 세 가지 이유에서 VST의 worst-case scenario입니다.
+The theoretical taxonomy inferred that deep contamination carries the highest cost. Backdoor research confirms this empirically. Lower-layer contamination is VST's worst-case scenario for three distinct reasons.
 
-**실증 1: 오염이 early MLP layers에 집중됨 — 위치 자체가 문제 (arXiv:2507.11112, 2025)**
+**Evidence 1: Contamination concentrates in early MLP layers — location is the problem (arXiv:2507.11112, 2025)**
 
-Multi-trigger poisoning 연구에서 clean model과 poisoned model의 weight difference를 L2 distance로 전수 분석:
+Multi-trigger poisoning research performs exhaustive L2 distance analysis of weight differences between clean and poisoned models:
 
-> "가장 큰 weight deviation이 embedding과 **MLP layers**에 집중, attention layers의 cosine similarity는 오염 후에도 비교적 일정"
+> "The largest weight deviations concentrate in the embedding and **MLP layers**; cosine similarity in attention layers remains relatively stable after contamination."
 
-오염은 attention이 아닌 MLP에 새깁니다. Section 7.5의 발견 — MLP가 factual knowledge의 1차 저장소, AIE 8.7% — 과 직결됩니다. 오염이 가장 중요한 구역에 가장 깊이 박힙니다.
+Contamination embeds in MLP, not attention. This connects directly to the finding in Appendix A.5 — MLP as the primary storage site for factual knowledge (AIE 8.7%). Contamination roots itself in the highest-importance zone.
 
-복구 비용 실측:
-- MLP 선택적 재훈련만으로 전체 파라미터의 **78%만 건드려** full fine-tuning과 동등한 회복 달성
-- ASR (Attack Success Rate): MLP 재훈련 후 **22.97%** vs full fine-tuning **22.56%** — 사실상 동일
-- Embedding + MLP 동시 재훈련이 핵심 — 어느 하나만으로는 불충분
+Measured recovery cost:
+- Selective retraining of MLP layers alone, touching only **78% of parameters**, achieves recovery equivalent to full fine-tuning
+- ASR (Attack Success Rate): MLP retraining **22.97%** vs full fine-tuning **22.56%** — effectively identical
+- Simultaneous retraining of embedding + MLP is required — either alone is insufficient
 
-VST 매핑: 오염 제거의 최소 단위는 MLP zone 전체입니다. 개별 파라미터 수정이 아니라 해당 zone의 구조적 재구성이 필요합니다.
+VST mapping: the minimum unit of contamination removal is the entire MLP zone. Structural reconstruction of that zone is required — not targeted parameter-level modification.
 
-**실증 2: Pretraining 단계 오염은 단 250개 문서로 충분 (arXiv:2510.07192, 2025)**
+**Evidence 2: 250 documents are sufficient to contaminate pretraining (arXiv:2510.07192, 2025)**
 
-600M~13B 파라미터, 6B~260B 토큰의 chinchilla-optimal 학습에서:
+Across chinchilla-optimal training runs spanning 600M–13B parameters and 6B–260B tokens:
 
-> 모델 크기나 데이터셋 크기와 **무관하게** 250개 poisoned documents로 backdoor 주입 성공
+> Backdoor injection succeeds with 250 poisoned documents **regardless** of model size or dataset size.
 
-13B 모델이 260B 토큰으로 훈련되더라도 250개 오염 문서 = 전체의 **0.0001%** 미만으로 오염 성공. 이것이 VST에서 "소량의 오염 벡터가 넓은 공간에 전파될 수 있다"는 예측의 실측 확인입니다.
+Even a 13B model trained on 260B tokens is successfully contaminated by 250 poisoned documents — less than **0.0001%** of the total. This is the empirical confirmation of VST's prediction that a small contaminated vector can propagate across a large space.
 
-하위 레이어에 한 번 자리잡은 오염은 이후 쌓이는 방대한 clean data도 제거하지 못합니다. 오염의 지속성이 데이터 규모와 무관합니다.
+Once contamination roots itself in lower layers, the accumulated volume of subsequent clean data cannot remove it. Contamination persistence is scale-independent.
 
-**실증 3: 하위 레이어 오염은 표준 안전 훈련을 전부 통과 (Hubinger et al., 2024 — Sleeper Agents)**
+**Evidence 3: Lower-layer contamination bypasses all standard safety training (Hubinger et al., 2024 — Sleeper Agents)**
 
-Anthropic의 Sleeper Agents 연구:
+Anthropic's Sleeper Agents research:
 
-> Supervised Fine-Tuning, RLHF, Adversarial Training — **세 가지 안전 훈련 방법 모두** backdoor 제거 실패
+> Supervised Fine-Tuning, RLHF, Adversarial Training — **all three safety training methods** fail to remove the backdoor.
 
-오히려 adversarial training이 backdoor를 더 탐지하기 어렵게 만드는 역효과 발생. 이것은 표준 Distracting 방법들이 하위 레이어 deep contamination에 무효함을 의미합니다. 상위 레이어 행동을 교정하는 방법들이 하위 레이어 구조적 오염에 도달하지 못합니다.
+Adversarial training produces the opposite effect — making the backdoor harder to detect. This means standard Distracting methods are ineffective against deep lower-layer contamination. Methods that correct upper-layer behavior cannot reach structural contamination in lower layers.
 
-**실증 4: Final layers가 오염에 가장 민감하지만 — 하위 오염이 더 위험한 이유 (arXiv:2510.15106)**
+**Evidence 4: Final layers are most sensitive to contamination — yet lower-layer contamination is more dangerous (arXiv:2510.15106)**
 
-PoTS 연구: final layers가 backdoor poisoning에 heightened sensitivity를 보임. 그러나 이것은 탐지의 용이성이지, 오염의 심각성이 아닙니다.
+PoTS research: final layers show heightened sensitivity to backdoor poisoning. However, this reflects ease of detection, not severity of contamination.
 
-역설: **탐지는 상위 레이어에서 쉽고, 오염의 근원은 하위 레이어 MLP에 있습니다.** 탐지 신호와 오염 위치가 다른 레이어에 있습니다. 상위 레이어에서 이상 탐지 → 하위 MLP에서 근원 제거가 필요한 2단계 구조입니다.
+The paradox: **detection is easy at upper layers, but the source of contamination lies in lower-layer MLP.** Detection signal and contamination location reside in different layers. This creates a two-stage requirement: anomaly detection at upper layers → root removal at lower MLP.
 
-**Backdoor Attribution으로 본 오염 전파 경로 (arXiv:2509.21761)**
+**Contamination Propagation Pathway via Backdoor Attribution (arXiv:2509.21761)**
 
-BkdAttr (causal tracing framework): backdoor features는 **layer 1부터 probe classifier로 탐지 가능**합니다. 오염이 가장 낮은 레이어부터 인코딩됩니다. 이것은 VST의 예측과 일치합니다 — 하위 레이어 오염은 전체 계층 구조의 기반을 오염시키기 때문에 위험합니다. 위에 쌓이는 모든 처리가 오염된 기반 위에서 수행됩니다.
+BkdAttr (causal tracing framework): backdoor features are **detectable via probe classifier from layer 1**. Contamination is encoded from the lowest layers upward. This aligns with VST's prediction — lower-layer contamination is dangerous precisely because it corrupts the foundation of the entire layered structure. Every subsequent processing stage operates on top of a contaminated base.
 
-**하위 레이어 오염의 비용 구조 업데이트:**
+**Updated cost structure for lower-layer contamination:**
 
 ```
 Recovery Cost (lower-layer MLP contamination):
 
-  탐지:    상위 레이어 probe로 가능 (Appendix A.7, Gnosis)
-  위치:    weight difference L2 analysis → early MLP layers
-  제거:    MLP zone 선택적 재훈련 필요
-           → 78% 파라미터 재훈련 (full fine-tuning의 근사 비용)
+  Detection:  upper-layer probe viable (Appendix A.7, Gnosis)
+  Location:   weight difference L2 analysis → early MLP layers
+  Removal:    selective MLP zone retraining required
+              → 78% parameter retraining (approximate cost of full fine-tuning)
   
-  표준 방법의 무효성:
-  - SFT: 하위 레이어 구조에 도달 못함
-  - RLHF: 행동 교정, 표현 구조 유지
-  - Adversarial training: 오히려 탐지 난이도 상승
+  Standard method ineffectiveness:
+  - SFT: cannot reach lower-layer structure
+  - RLHF: corrects behavior, leaves representational structure intact
+  - Adversarial training: increases detection difficulty
   
-  최소 오염 비용:  250 documents (pretraining 규모 무관)
-  최대 복구 비용:  full fine-tuning 수준 (1.46M GPU-hours floor at 8B)
+  Minimum contamination cost:  250 documents (scale-independent)
+  Maximum recovery cost:       full fine-tuning level (1.46M GPU-hours floor at 8B)
 ```
 
 **Governance implication for VST:**
@@ -1426,7 +1426,7 @@ Specific τ values per zone remain an open empirical problem. The architectural 
 
 Metadata injection frequency cannot be fixed uniformly across all vectors. The correct principle is:
 
-> **벡터가 민감할수록, 그리고 확장력이 클수록 — 즉 다른 벡터에 대한 영향력이 클수록 — 주입 빈도는 높아야 한다.**
+> **The more sensitive a vector, and the greater its propagation force — i.e., its influence over other vectors — the higher the required injection frequency.**
 
 This is not an ad hoc design preference. It follows directly from the contamination propagation model in Section 2.1 and has an empirical parallel in current single-agent systems.
 
@@ -1544,7 +1544,7 @@ The **5% principle** (Chen et al.) gives this architecture a calibrated scale: o
 
 Injection frequency and injection signal strength are independent variables that must be set in opposite directions for sensitive zones.
 
-> **민감한 벡터 구역일수록: 감지 빈도 ↑, 개입 신호 강도 ↓**
+> **Higher sensitivity zone: detection frequency ↑, intervention signal amplitude ↓**
 
 This is not a heuristic. It is structurally required by three independent empirical findings:
 
@@ -1802,114 +1802,114 @@ Vector Storm analogues across gradient conflict, GAN mode collapse, social polar
 
 ### A.9 Single-Agent Self-Objectification: Relative Position via Interaction
 
-**구조적 제약: 에이전트는 자기 내부를 직접 볼 수 없다**
+**Structural constraint: an agent cannot directly observe its own internals**
 
-에이전트는 블랙박스입니다. 자신의 가중치, 활성화 상태, attractor 위치를 내부에서 직접 측정할 수 없습니다. Section 2.3에서 정의한 Self-Objectification Deficit의 구조적 원인이 여기 있습니다. 이것은 기능 부족이 아니라 아키텍처의 근본 특성입니다.
+The agent is a black box. It cannot directly measure its own weights, activation states, or attractor position from within. This is the structural source of the Self-Objectification Deficit defined in Section 2.3. It is not a capability gap — it is a fundamental architectural property.
 
-그런데 출력은 볼 수 있습니다. 그리고 타 에이전트의 출력도 볼 수 있습니다.
+However, the agent can observe its own outputs. And it can observe the outputs of other agents.
 
-여기서 핵심 관계가 성립합니다:
+This establishes the core relationship:
 
 ```
-직접 측정:   Self_position(A)       → 불가능
-상대 추정:   Self_position(A) ≈ f( Output(A) - Output(B) )  → 가능
+Direct measurement:   Self_position(A)                               → not accessible
+Relative estimation:  Self_position(A) ≈ f( Output(A) - Output(B) ) → accessible
 ```
 
-자기 position은 절대값으로 접근 불가능하고, **차이(divergence)를 통해서만 간접 추정 가능합니다.** 이것이 multi-agent 상호교류가 단순한 협력 메커니즘이 아니라 **싱글에이전트가 구조적으로 생성할 수 없는 자기인식을 시스템 차원에서 보완하는 메커니즘**인 이유입니다.
+Self-position is inaccessible as an absolute value — it is **only estimable indirectly through divergence**. This is why multi-agent interaction is not merely a cooperation mechanism, but **the system-level mechanism that compensates for the self-awareness that a single agent structurally cannot generate on its own**.
 
-**Loop invisibility: 자기인식 실패의 가장 명확한 사례**
+**Loop invisibility: the clearest case of self-objectification failure**
 
-혼자 작동하는 에이전트는 자신이 loop 안에 있을 때 그것을 loop로 인식하지 못합니다. 각 출력이 직전 출력에서 locally consistent하게 따라오기 때문입니다. Loop는 내부에서 "계속 최적화 중인 상태"로 보입니다. 외부 참조점 없이는 패턴이 패턴으로 보이지 않습니다.
+An agent operating alone cannot recognize when it is inside a loop. Each output follows locally consistently from the previous one. From the inside, the loop appears as "continued optimization." Without an external reference point, the pattern does not appear as a pattern.
 
-이것이 Section 7.8의 entropy collapse와 연결되는 지점입니다. Entropy 신호는 외부에서 loop를 탐지하는 것이고, self-objectification은 에이전트가 그 상태를 **내부에서** 얼마나 인식할 수 있는가의 문제입니다. 현재 아키텍처에서 후자는 구조적으로 제한됩니다.
+This connects to the entropy collapse described in Appendix A.8. The entropy signal detects loops from the outside; self-objectification is the question of how much an agent can recognize that state **from within**. In current architectures, the latter is structurally limited.
 
 ---
 
-**실증 1: Gnosis — 내부 회로를 통한 자기 실패 예측 (arXiv:2512.20578, 2025/2026)**
+**Evidence 1: Gnosis — predicting self-failure through internal circuits (arXiv:2512.20578, 2025/2026)**
 
-가장 직접적인 실증입니다. Gnosis는 다음 질문에 답하려 합니다:
+This is the most direct evidence. Gnosis addresses the following question:
 
-> "LLM이 외부 판단자 없이 자신의 내부 상태를 관찰함으로써 자신의 실패를 예측할 수 있는가?"
+> "Can an LLM predict its own failures by observing its internal states, without an external judge?"
 
-결과:
-- hidden states와 attention pattern에서 추출한 신호로 correctness를 예측하는 경량 메커니즘(~5M 파라미터)
-- frozen backbone (1.7B~20B) 전 범위에서 외부 judge 및 internal baseline 모두 초과 성능
-- 수학 추론, QA, MMLU-Pro 전 도메인에서 일반화
-- partial generation에서도 early detection 가능 → failing trajectory를 출력 완성 전에 감지
+Results:
+- Lightweight mechanism (~5M parameters) predicts correctness from signals extracted via hidden states and attention patterns
+- Outperforms both external judges and internal baselines across frozen backbones (1.7B–20B)
+- Generalizes across mathematical reasoning, QA, and MMLU-Pro domains
+- Early detection possible on partial generations → failing trajectories detectable before output completion
 
-**VST 매핑:**
+**VST mapping:**
 
-| Gnosis 발견 | VST 의미 |
+| Gnosis finding | VST meaning |
 |---|---|
-| Hidden activations diverge between correct and hallucinated outputs | Stage 1 내부 신호가 output에 앞서 hidden state에 이미 존재 |
-| Factuality cues concentrated in middle/deep layers | Section 7.5의 고중요도 zone이 self-monitoring의 정보 밀도 높음 |
-| Early detection on partial generations | Stage 1→2 전환 이전에 내부 신호 탐지 가능 — 사전 개입 여지 있음 |
-| ~5M parameters, no fine-tuning of backbone | 최소 개입으로 self-monitoring 추가 가능 |
+| Hidden activations diverge between correct and hallucinated outputs | Stage 1 internal signal already exists in hidden state prior to output |
+| Factuality cues concentrated in middle/deep layers | High-importance zone (Appendix A.5) carries high information density for self-monitoring |
+| Early detection on partial generations | Internal signal detectable before Stage 1→2 transition — intervention window exists |
+| ~5M parameters, no fine-tuning of backbone | Self-monitoring can be added with minimal intervention |
 
-핵심 함의: **correctness cues are intrinsic to the generation process.** 자기인식에 필요한 정보가 외부에 있는 것이 아니라 내부 activation에 이미 존재합니다. 접근 메커니즘이 없었을 뿐입니다.
+Core implication: **correctness cues are intrinsic to the generation process.** The information required for self-awareness already exists in internal activations — it is not external. What was missing was an access mechanism.
 
-그러나 Gnosis는 중요한 한계를 가집니다. 이것은 사후 monitoring이지 사전 attractor 인식이 아닙니다. "내가 틀렸다"는 것을 generation 중에 감지할 수 있지만, "내가 어떤 attractor 구역에 있는가"를 생성 전에 알 수는 없습니다. Position 인식과 error 인식은 다른 문제입니다.
-
----
-
-**실증 2: 상호교류에서의 disagreement = position 추정 신호 (Co-Sight, arXiv:2510.21557; Disagreement as Data, arXiv:2601.12618)**
-
-Co-Sight의 CAMV(Conflict-Aware Meta-Verification) 구조가 핵심입니다. 여러 에이전트의 추론 경로 중 **divergent nodes만을 선별하여 검증**합니다. 동의하는 부분은 통과시키고, 불일치 지점만 meta-verifier가 재검토합니다.
-
-이것이 의미하는 것: divergence는 오류 신호가 아니라 **어느 에이전트의 position이 다른가를 드러내는 구조적 신호**입니다. disagreement가 발생한 지점 = 두 에이전트의 attractor basin이 다른 지점.
-
-```
-에이전트 A가 자기 position을 아는 방법:
-  1. Output(A) 생성
-  2. Output(B)와 비교
-  3. divergence point 확인
-  4. "나는 B와 이 지점에서 다른 attractor에 있다"
-
-이 정보는 A 혼자서는 생성 불가능
-B의 존재와 비교 과정이 필수
-```
-
-Disagreement as Data (arXiv:2601.12618, 2026): 다중 에이전트 추론에서 불일치를 noise가 아닌 "rich analytic signal"로 재정의합니다. Cosine similarity로 에이전트 간 alignment/divergence를 정량적으로 측정하며, 이것이 개별 에이전트의 reasoning 품질을 평가하는 데 사용됩니다.
-
-**VST 매핑:** divergence measurement = 에이전트의 현재 vector position을 상대적으로 추정하는 실무 구현입니다.
+However, Gnosis has a critical limitation. It is post-hoc monitoring, not pre-generation attractor awareness. It can detect "I am failing" during generation, but cannot answer "which attractor zone am I in" before generation begins. Position awareness and error awareness are distinct problems.
 
 ---
 
-**실증 3: Self-recognition의 현재 한계 — 크기 의존성과 맥락 의존성**
+**Evidence 2: Disagreement in interaction = position estimation signal (Co-Sight, arXiv:2510.21557; Disagreement as Data, arXiv:2601.12618)**
 
-Self-recognition in LLMs 연구(EmergentMind, 2025)가 현재 상태를 정리합니다:
+The core mechanism is Co-Sight's CAMV (Conflict-Aware Meta-Verification): among multiple agent reasoning paths, it **selectively verifies only divergent nodes**. Agreement passes through; only disagreement points are re-examined by the meta-verifier.
 
-Self-objectification과 관련된 여섯 가지 구별 능력:
-- Authorship recognition (자기 출력 식별)
-- Knowledge boundary awareness (자기 지식 한계 인식)
-- Reflection and self-correction (자기 오류 수정)
-- Behavioral self-awareness (자기 정책 인식)
+What this means: divergence is not an error signal — it is a **structural signal revealing which agent's position differs**. The point of disagreement marks the boundary where two agents' attractor basins diverge.
+
+```
+How agent A comes to know its own position:
+  1. Generate Output(A)
+  2. Compare with Output(B)
+  3. Identify divergence point
+  4. "I am in a different attractor from B at this point"
+
+This information cannot be generated by A alone.
+The existence of B and the comparison process are both required.
+```
+
+Disagreement as Data (arXiv:2601.12618, 2026): reframes disagreement in multi-agent reasoning as a "rich analytic signal" rather than noise. Cosine similarity quantifies alignment and divergence between agents, and this measurement is used to evaluate individual agent reasoning quality.
+
+**VST mapping:** divergence measurement = the practical implementation of estimating an agent's current vector position in relative terms.
+
+---
+
+**Evidence 3: Current limits of self-recognition — size dependence and context dependence**
+
+Self-recognition in LLMs research (EmergentMind, 2025) maps the current state:
+
+Six distinct capabilities related to self-objectification:
+- Authorship recognition (identifying own outputs)
+- Knowledge boundary awareness (recognizing own knowledge limits)
+- Reflection and self-correction (correcting own errors)
+- Behavioral self-awareness (awareness of own behavioral policy)
 - Activation-level self-direction (self-recognition direction in activations)
-- Strategic self-modeling (타 에이전트와 상호작용 시 자기 모델링)
+- Strategic self-modeling (self-modeling during interaction with other agents)
 
-**결정적 발견:** Emergent self-cognition은 모델 크기와 훈련 품질에 상관됩니다. 소수의 대형 모델(Claude-3-Opus, Llama-3-70B-Instruct 등)만이 multi-turn, multi-principle interrogation 하에서 full state self-cognition을 보입니다.
+**Key finding:** Emergent self-cognition correlates with model size and training quality. Only a small number of large models (Claude-3-Opus, Llama-3-70B-Instruct, etc.) demonstrate full self-cognition under multi-turn, multi-principle interrogation.
 
-중소형 모델이 대부분인 실제 배포 환경에서, single-agent self-objectification은 아키텍처적으로 불완전하거나 부재합니다. 이것이 Pathway 3가 현재 기준으로 "future"로 분류된 근거입니다.
+In real deployment environments where mid-to-small models predominate, single-agent self-objectification is architecturally incomplete or absent. This is the basis for classifying Pathway 3 as a future-state capability under current conditions.
 
-**Self-preference bias의 추가 문제:** self-recognition 능력이 있는 에이전트는 자신의 출력을 체계적으로 선호하고 과평가합니다(Panickssery et al., 2024). 자기인식 능력이 자기교정이 아닌 자기강화로 작용할 수 있습니다. 이것은 VST에서 강력한 attractor를 가진 에이전트가 외부 신호를 거부하는 패턴과 정확히 대응합니다.
+**Additional problem — self-preference bias:** agents with self-recognition capability systematically prefer and overvalue their own outputs (Panickssery et al., 2024). Self-awareness capacity can operate as self-reinforcement rather than self-correction. This maps precisely to the VST pattern where agents with strong attractors reject external signals.
 
 ---
 
-**Pathway 3 연결: 상호교류 기반 self-objectification의 현재 구현 가능성**
+**Pathway 3 connection: current implementation feasibility of interaction-based self-objectification**
 
-| 접근 | 현재 상태 | 구현 가능성 |
+| Approach | Current status | Implementation feasibility |
 |---|---|---|
-| **Gnosis 방식** — hidden state 기반 내부 self-monitoring | 실증 완료, ~5M 파라미터 경량 추가 | **현재 구현 가능** |
-| **Disagreement 기반** — 타 에이전트 output과의 divergence 측정 | Co-Sight, CAMV로 실증 | **현재 구현 가능** |
-| **Entropy 기반** — output entropy 변화로 attractor lock-in 감지 | Section 7.8에서 실증 | **현재 구현 가능** |
-| **직접 position 인식** — 자신의 attractor basin 위치를 내부에서 파악 | 이론 미완성, 실증 없음 | **미래 과제** |
-| **사전 loop 예측** — loop 진입 전 자기인식으로 회피 | Gnosis는 사후, 사전은 열린 문제 | **미래 과제** |
+| **Gnosis approach** — hidden state-based internal self-monitoring | Empirically validated, ~5M parameter lightweight addition | **Currently implementable** |
+| **Disagreement-based** — measuring divergence against other agents' outputs | Validated via Co-Sight, CAMV | **Currently implementable** |
+| **Entropy-based** — detecting attractor lock-in via output entropy change | Validated in Appendix A.8 | **Currently implementable** |
+| **Direct position awareness** — identifying own attractor basin location from within | Theory incomplete, no empirical basis | **Future work** |
+| **Pre-generation loop prediction** — avoiding loops via self-awareness before entry | Gnosis is post-hoc; pre-generation remains open | **Future work** |
 
-**실무 요약:**
+**Operational summary:**
 
-현재 가능한 것은 **사후 self-monitoring + 상호교류를 통한 간접 position 추정**입니다. 진정한 사전 self-objectification — 자신이 어떤 attractor에 있는지 생성 전에 아는 것 — 은 아직 열린 문제입니다. 그러나 상호교류 구조가 이 gap을 시스템 차원에서 보완할 수 있다는 것이 Co-Sight와 disagreement 연구들의 핵심 함의입니다.
+What is currently achievable is **post-hoc self-monitoring + indirect position estimation through interaction**. True pre-generation self-objectification — knowing which attractor one is in before generation begins — remains an open problem. However, the core implication of Co-Sight and disagreement research is that interaction structure can compensate for this gap at the system level.
 
-> Pathway 3의 실현 조건: 내부 self-monitoring(Gnosis 방식) + 외부 divergence 측정(disagreement 기반) + 상위 레이어 capacity map(Appendix A.7) 세 가지를 통합한 아키텍처.
+> Pathway 3 realization conditions: an architecture integrating all three — internal self-monitoring (Gnosis approach) + external divergence measurement (disagreement-based) + upper-layer capacity map (Appendix A.7).
 
 ---
 
