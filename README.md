@@ -256,6 +256,28 @@ The goal of governance is not zero instability. It is maintaining Growth Benefit
 
 This residual floor is a residual variability that prevents complete convergence and sustains exploration diversity across the fractal.
 
+**Asymptotic lower bound:**
+
+The instability equation
+
+$$\frac{dS}{dt} = \alpha n^2 - \beta C(t)$$
+
+has a structural lower bound. C(t) can grow toward maximum degradation capacity through resource investment and architectural improvement, but the lowest layer imposes a floor that C(t) cannot overcome:
+
+$$\lim_{t \to \infty} \frac{dS}{dt} \geq \alpha n^2 - \beta C_{\max} > 0$$
+
+where $C_{\max}$ is the ceiling imposed by the lowest layer's minimum-viable degradation state. The right-hand side never reaches zero as long as n > 0. This is not an engineering gap — it is a structural property of fractal architecture.
+
+```
+Upper layers     → mature vector spaces, C(t) grows toward capacity
+Middle layers    → mediation capacity, partial containment
+Lowest layer     → minimum viable degradation only
+                   residual friction always present
+                   C_max ceiling cannot be eliminated by design
+```
+
+**The governance implication:** the design target is not dS/dt = 0, but dS/dt < 0 on average — benefit growth rate exceeding storm cost growth rate. The residual floor defines the minimum noise baseline that any intervention must accept (see Section 3.3, governance calibration note below).
+
 **Single-Agent Analogue: Structural Noise Discard as Design**
 
 This is not a failure state. It is empirically observable as a designed property of LLM layer architecture.
@@ -609,6 +631,204 @@ The existence of an entire research field — machine unlearning — dedicated t
 
 The inferred implication for balance: a system that over-attracts (integrates too readily without sufficient Distracting capacity) accumulates contamination that eventually requires full retraining to resolve. A system that over-distracts (applies maximum Distracting to every signal) is operating at a cost level that scales toward 1.46M GPU-hours per correction cycle. The optimal balance sits between these two failure modes — sufficient Distracting to prevent contamination accumulation, insufficient to require full retraining for routine corrections. Formalizing this boundary remains an open problem (Section 11).
 
+**MoE Routing as Structural Analogue: Empirical Balance Distribution**
+
+Mixture-of-Experts (MoE) routing is mathematically isomorphic to the Attracting/Distracting cycle. The router deciding which expert receives each token = Attracting (pulling a signal into that expert's attractor basin). Token dropping or rerouting when expert capacity is exceeded = Distracting (ejecting a signal from an overloaded attractor). Load balancing — the central engineering problem in MoE — is therefore the Attracting/Distracting balance problem in directly measurable form.
+
+This provides the first empirical anchor for the optimal balance function.
+
+**Failure mode quantification: Routing collapse = over-attract**
+
+Without balancing mechanisms, MoE routers converge to using only a small subset of experts — a phenomenon called routing collapse. In this state, a few dominant attractors absorb all signals while the rest of the expert capacity sits unused. Measured via Gini coefficient of expert load:
+
+| State | Gini coefficient | Interpretation |
+|---|---|---|
+| Routing collapse (over-attract) | **0.70** | Highly skewed — few attractors dominate |
+| Near-perfect balance | **0.035** | Uniform attractor utilization |
+| Min-max expert load ratio (collapsed) | **1e-6** | Most-loaded vs. least-loaded expert ratio near zero |
+| Min-max expert load ratio (balanced) | **0.70** | Near-uniform distribution |
+
+(LPR, arXiv:2506.21328, 2025 — DeepSeek-V3, Qwen3-MoE, Mixtral)
+
+Routing collapse maps directly to VST's pathological attractor dominance: a single strong attractor absorbs all incoming signals, suppressing diversity and eliminating the exploration value the system was built to provide. Gini = 0.70 is the measured signature of this state.
+
+**Natural balance distribution: Expert Choice routing data**
+
+Expert Choice routing (Zhou et al., 2022) — where experts select their tokens rather than tokens selecting experts — reveals the empirically natural distribution of how many attractors a signal actually needs:
+
+| Token routing | Percentage | Interpretation |
+|---|---|---|
+| Routed to 1–2 experts | **~74%** | Single attractor sufficient — standard Attracting |
+| Routed to 3–4 experts | **~23%** | Moderate complexity — shared attractor processing |
+| Routed to 4+ experts | **~3%** | High complexity — multi-attractor disambiguation needed |
+
+This distribution is not imposed — it emerges from letting experts competitively select the tokens they are best suited to process. The implication: roughly **74% of signals are naturally Attracting-dominant** (one attractor handles them cleanly), and only **~3% require intensive multi-attractor Distracting** to resolve.
+
+This is the first empirically grounded estimate of the natural Attracting/Distracting ratio in a signal-processing system with no artificial constraint on the distribution.
+
+**Capacity factor as balance control variable**
+
+The capacity factor c in MoE (tokens per expert / average load) is the operational lever for the Attracting/Distracting balance:
+
+```
+c = (k × n) / e
+  where k = experts per token, n = total tokens, e = number of experts
+
+c < 1.0  → over-constrained: forced token dropping → excess Distracting
+c = 1.0  → exact balance: no slack, high sensitivity to load spikes
+c > 1.0  → slack available: absorbs load variance → stable Attracting-dominant
+```
+
+Empirical finding: over-capacity ratio reaches **20–40%** for some experts under token-choice routing without balancing constraints (Expert Choice, 2022). This is the measured cost of leaving balance uncontrolled — 20–40% of routing decisions are suboptimal, representing wasted Attracting capacity and unnecessary Distracting load.
+
+**Attention saturation as Attracting overload signal**
+
+Complementary evidence from attention inflection layer research (arXiv:2511.00797, 2025): layers where attention entropy is simultaneously low and gradient decay is steep = **Attracting saturation** — the attractor basin has become so dominant that incoming signals have no room to form new structure. These inflection layers require targeted Distracting intervention (LoRA injection at the saturation point) to restore balance.
+
+Diagnostic metric:
+```
+Attracting saturation signal:
+  low attention entropy (H_att < τ_sat)
+  AND steep gradient decay (∂L/∂W ↓ sharply)
+  → attractor over-dominant → Distracting intervention needed
+
+Normal Attracting state:
+  moderate attention entropy
+  stable gradient flow
+  → no intervention needed
+```
+
+**Revised balance formalization:**
+
+The optimal balance is not a fixed ratio but a **load-adaptive function** of current attractor utilization:
+
+```
+Balance(t) = f(load_distribution(t), capacity_factor(t))
+
+Over-attract condition:   Gini(expert_load) > τ_gini  (~0.3–0.5)
+                          OR attention saturation detected
+                          → increase Distracting weight
+
+Balanced condition:       Gini(expert_load) < τ_balance  (~0.035–0.1)
+                          → maintain current Attracting/Distracting ratio
+
+Over-distract condition:  min-max load ratio < τ_min  (approaching 1e-6)
+                          AND performance degradation
+                          → reduce Distracting, allow attractor formation
+```
+
+Specific τ values require per-architecture calibration. The structural shape of the function — load-adaptive, Gini-monitored, with three-regime response — is now empirically grounded.
+
+---
+
+### 7.1.1 Multi-Dimensional Threshold Calibration: Beyond Gini
+
+Gini coefficient alone is insufficient as a balance threshold. Gini measures **token distribution across experts** — how many tokens each expert receives. It does not capture **vector direction structure** — whether experts that receive similar numbers of tokens are actually doing different work. A system with Gini = 0.035 (near-perfect load balance) can still be in attractor collapse if all experts have converged to similar representations.
+
+Three independent measurement axes are required, each capturing a distinct failure mode:
+
+**Axis 1: Gini coefficient — token load distribution**
+
+Already established (Section 7.1). Measures routing skew. Catches over-attraction at the load level.
+
+```
+τ_gini_collapse  ≈ 0.70  (empirical ceiling — LPR, arXiv:2506.21328)
+τ_gini_balanced  ≈ 0.035 (empirical floor — LPR, arXiv:2506.21328)
+τ_gini_warn      ≈ 0.3–0.5 (intervention zone — per-architecture calibration needed)
+```
+
+**Axis 2: Spectral entropy of expert similarity — vector direction diversity**
+
+GatePro (arXiv:2510.13079) constructs the cosine similarity matrix across all expert weight vectors and computes the spectral entropy of this matrix. This directly measures whether experts are pointing in diverse directions in representation space.
+
+```
+Spectral entropy HIGH  → expert vectors are dispersed across directions
+                          = attractor basin diversity is healthy
+                          = each expert specializes in genuinely distinct subspace
+
+Spectral entropy LOW   → few dominant eigenmodes in the similarity matrix
+                          = most experts share the same representational direction
+                          = structurally a single attractor even if load is balanced
+```
+
+Key finding: GatePro shows that **deep layers are consistently harder to diversify** than shallow layers. Specialization in middle and late layers requires active intervention (competitive propagation) that early layers do not need. This maps to VST's layer-differentiated stability concern: the same input can produce healthy Gini at shallow layers but collapsing spectral entropy at deep layers simultaneously.
+
+VST implication: τ values cannot be uniform across depth. Deep layer balance thresholds require tighter spectral entropy monitoring than shallow layers.
+
+**Axis 3: Average cosine similarity — representational redundancy**
+
+Complementary to spectral entropy: average pairwise cosine similarity between expert weight vectors.
+
+```
+Average cosine similarity LOW   → experts encode genuinely different representations
+                                   = attractor basins are distinct
+                                   = Distracting effectively sends signals to different zones
+
+Average cosine similarity HIGH  → experts are near-redundant
+                                   = apparent diversity is illusory
+                                   = Distracting into "different" experts is not actually distracting
+```
+
+GatePro demonstrates that models trained without diversity objectives show **higher cosine similarity values and unstable distributions** — the experts look different by routing count but share the same representational geometry. This is a failure mode that Gini cannot detect.
+
+**Routing confidence entropy — space maturity signal**
+
+Continuous Expert Rerouting research (arXiv:2510.14853) introduces a fourth signal: **per-layer routing entropy** tracking how confidently the router assigns tokens to experts.
+
+```
+Router entropy DECREASING over generation steps  → routing decisions are stabilizing
+                                                    = space is converging, maturing
+Router entropy STABLE LOW                        → mature space, confident routing
+Router entropy HIGH with FLUCTUATIONS            → immature or destabilized space
+                                                    = not yet ready for seed injection (Section 7.4.1)
+```
+
+This is directly applicable to Space Maturity measurement (Section 7.4): router entropy trajectory over inference steps is a real-time maturity signal, complementing the static gradient norm and CKA measures.
+
+**Updated multi-dimensional balance formalization:**
+
+```
+Balance(t) = f(
+  Gini(expert_load),           ← token distribution
+  SpectralEntropy(W_experts),  ← vector direction diversity  
+  AvgCosineSim(W_experts),     ← representational redundancy
+  RouterEntropy(layer, t)      ← routing confidence / maturity
+)
+
+Failure modes (each independently triggers intervention):
+
+  Load collapse:       Gini > τ_gini (~0.3–0.5)
+                       → rebalance token routing
+
+  Direction collapse:  SpectralEntropy < τ_spectral
+                       → inject diversity pressure (Distracting into underused subspaces)
+
+  Redundancy collapse: AvgCosineSim > τ_cosine
+                       → orthogonalization intervention (expert weight regularization)
+
+  Maturity failure:    RouterEntropy high + fluctuating
+                       → delay injection, allow space to stabilize first
+```
+
+**Per-layer calibration requirement:**
+
+All four metrics behave differently by depth. GatePro confirms deep layers require more intervention to achieve the same diversity level as shallow layers. The implication for per-architecture calibration:
+
+```
+τ(metric, layer) ≠ τ(metric)   ← layer-indexed, not flat
+
+Deep layers:   τ_spectral lower (harder to diversify → tighter threshold)
+               τ_cosine lower (redundancy more likely → tighter threshold)
+Shallow layers: τ_gini sufficient primary signal
+               spectral entropy naturally higher (easier specialization)
+```
+
+The previously open problem — "per-architecture τ_gini calibration" — is now more precisely stated: per-architecture, per-layer, per-metric calibration. The structural form of the multi-dimensional monitor is established; specific threshold values remain empirically open.
+
+**References added:**
+- Anonymous. (2025). GatePro: Parameter-Free Expert Selection Optimization. arXiv:2510.13079. [spectral entropy, cosine similarity diversity metrics]
+- Anonymous. (2025). Continuous Expert Rerouting. arXiv:2510.14853. [per-layer router entropy as maturity signal]
+
 ### 7.2 Switching Trigger
 
 - S > threshold → Unstable. Emphasize distracting.
@@ -658,6 +878,72 @@ This finding directly maps to VST's contamination depth concern: a misaligned at
 
 A particularly useful depth indicator from unlearning literature: models with **constrained utility requirements** (i.e., shallow unlearning) retain an average of 21% of forgotten knowledge at full precision, but this rises to 83% after 4-bit quantization (Zhang et al., 2025 ICLR). This gap — 21% vs. 83% — reveals that shallow unlearning suppresses surface behavior without reaching deep representational structure. Deep contamination survives weight compression because it exists at structural, not behavioral, depth.
 
+**하위 레이어 오염의 실무 자료: 가장 심각한 케이스**
+
+이론적 분류에서 "deep contamination"이 가장 비싸다고 추론했지만, backdoor 연구들이 이것을 실측치로 확인합니다. 특히 하위 레이어 오염은 세 가지 이유에서 VST의 worst-case scenario입니다.
+
+**실증 1: 오염이 early MLP layers에 집중됨 — 위치 자체가 문제 (arXiv:2507.11112, 2025)**
+
+Multi-trigger poisoning 연구에서 clean model과 poisoned model의 weight difference를 L2 distance로 전수 분석:
+
+> "가장 큰 weight deviation이 embedding과 **MLP layers**에 집중, attention layers의 cosine similarity는 오염 후에도 비교적 일정"
+
+오염은 attention이 아닌 MLP에 새깁니다. Section 7.5의 발견 — MLP가 factual knowledge의 1차 저장소, AIE 8.7% — 과 직결됩니다. 오염이 가장 중요한 구역에 가장 깊이 박힙니다.
+
+복구 비용 실측:
+- MLP 선택적 재훈련만으로 전체 파라미터의 **78%만 건드려** full fine-tuning과 동등한 회복 달성
+- ASR (Attack Success Rate): MLP 재훈련 후 **22.97%** vs full fine-tuning **22.56%** — 사실상 동일
+- Embedding + MLP 동시 재훈련이 핵심 — 어느 하나만으로는 불충분
+
+VST 매핑: 오염 제거의 최소 단위는 MLP zone 전체입니다. 개별 파라미터 수정이 아니라 해당 zone의 구조적 재구성이 필요합니다.
+
+**실증 2: Pretraining 단계 오염은 단 250개 문서로 충분 (arXiv:2510.07192, 2025)**
+
+600M~13B 파라미터, 6B~260B 토큰의 chinchilla-optimal 학습에서:
+
+> 모델 크기나 데이터셋 크기와 **무관하게** 250개 poisoned documents로 backdoor 주입 성공
+
+13B 모델이 260B 토큰으로 훈련되더라도 250개 오염 문서 = 전체의 **0.0001%** 미만으로 오염 성공. 이것이 VST에서 "소량의 오염 벡터가 넓은 공간에 전파될 수 있다"는 예측의 실측 확인입니다.
+
+하위 레이어에 한 번 자리잡은 오염은 이후 쌓이는 방대한 clean data도 제거하지 못합니다. 오염의 지속성이 데이터 규모와 무관합니다.
+
+**실증 3: 하위 레이어 오염은 표준 안전 훈련을 전부 통과 (Hubinger et al., 2024 — Sleeper Agents)**
+
+Anthropic의 Sleeper Agents 연구:
+
+> Supervised Fine-Tuning, RLHF, Adversarial Training — **세 가지 안전 훈련 방법 모두** backdoor 제거 실패
+
+오히려 adversarial training이 backdoor를 더 탐지하기 어렵게 만드는 역효과 발생. 이것은 표준 Distracting 방법들이 하위 레이어 deep contamination에 무효함을 의미합니다. 상위 레이어 행동을 교정하는 방법들이 하위 레이어 구조적 오염에 도달하지 못합니다.
+
+**실증 4: Final layers가 오염에 가장 민감하지만 — 하위 오염이 더 위험한 이유 (arXiv:2510.15106)**
+
+PoTS 연구: final layers가 backdoor poisoning에 heightened sensitivity를 보임. 그러나 이것은 탐지의 용이성이지, 오염의 심각성이 아닙니다.
+
+역설: **탐지는 상위 레이어에서 쉽고, 오염의 근원은 하위 레이어 MLP에 있습니다.** 탐지 신호와 오염 위치가 다른 레이어에 있습니다. 상위 레이어에서 이상 탐지 → 하위 MLP에서 근원 제거가 필요한 2단계 구조입니다.
+
+**Backdoor Attribution으로 본 오염 전파 경로 (arXiv:2509.21761)**
+
+BkdAttr (causal tracing framework): backdoor features는 **layer 1부터 probe classifier로 탐지 가능**합니다. 오염이 가장 낮은 레이어부터 인코딩됩니다. 이것은 VST의 예측과 일치합니다 — 하위 레이어 오염은 전체 계층 구조의 기반을 오염시키기 때문에 위험합니다. 위에 쌓이는 모든 처리가 오염된 기반 위에서 수행됩니다.
+
+**하위 레이어 오염의 비용 구조 업데이트:**
+
+```
+Recovery Cost (lower-layer MLP contamination):
+
+  탐지:    상위 레이어 probe로 가능 (Section 7.7, Gnosis)
+  위치:    weight difference L2 analysis → early MLP layers
+  제거:    MLP zone 선택적 재훈련 필요
+           → 78% 파라미터 재훈련 (full fine-tuning의 근사 비용)
+  
+  표준 방법의 무효성:
+  - SFT: 하위 레이어 구조에 도달 못함
+  - RLHF: 행동 교정, 표현 구조 유지
+  - Adversarial training: 오히려 탐지 난이도 상승
+  
+  최소 오염 비용:  250 documents (pretraining 규모 무관)
+  최대 복구 비용:  full fine-tuning 수준 (1.46M GPU-hours floor at 8B)
+```
+
 **Governance implication for VST:**
 
 Intervention timing (Section 3.4) interacts with contamination depth non-linearly. Surface contamination caught early can be resolved with near-zero cost. The same contamination, if allowed to propagate into adjacent attractor basins through accumulated metadata and cross-layer reinforcement, transitions from surface to shallow to deep — at which point exact recovery becomes structurally impossible without full retraining. This is the cost of delayed intervention expressed in representational geometry rather than compute hours.
@@ -677,6 +963,129 @@ Recovery Cost(depth) ≈
 ```
 
 Formal cost function remains undefined. The depth → cost transition is not linear — there is likely a threshold between shallow and deep entanglement beyond which the cost function becomes discontinuous (collateral damage becomes unavoidable regardless of method choice).
+
+---
+
+### 7.3.1 Depth → Recovery Compute: Four-Regime Structure and Discontinuity Threshold
+
+The depth → cost function is not merely unknown in magnitude — it is structurally discontinuous. Recent unlearning research identifies the precise transition mechanism that produces the jump.
+
+**Four forgetting regimes (arXiv:2505.16831 — "Unlearning Isn't Deletion")**
+
+Representation-level analysis across six unlearning methods on Yi-6B and Qwen-2.5-7B, using PCA similarity/shift, CKA, and Fisher Information Matrix, identifies four distinct recovery regimes:
+
+```
+Regime 1: Reversible, Non-Catastrophic
+  Signature: CKA ≈ 1, PCA distance small, FIM concentrated
+  Meaning:   surface suppression — representations intact
+  Cost:      ~3 epochs lightweight fine-tuning
+  VST map:   surface contamination, caught early
+
+Regime 2: Reversible, Catastrophic
+  Signature: performance collapses, but CKA recovers after relearning
+  Meaning:   knowledge suppressed not erased —
+             easily restored via minimal fine-tuning
+  Cost:      O(fine-tune) — same order as Shallow in 7.3
+  VST map:   shallow contamination, local perturbation
+
+Regime 3: Irreversible, Catastrophic
+  Signature: CKA → 0, large PCA rotations, FIM flattened
+             performance collapse is permanent
+  Meaning:   representational geometry fundamentally altered
+  Cost:      O(retrain) — full retraining required
+  VST map:   deep contamination, distributed perturbation
+
+Regime 4: Irreversible, Non-Catastrophic  (theoretical ideal)
+  Meaning:   permanent targeted erasure, zero collateral
+  Cost:      unknown — currently not reliably achievable
+  VST map:   ideal Distracting: targeted, non-destructive
+```
+
+**The discontinuity mechanism: local vs. distributed perturbation**
+
+The transition from Regime 2 to Regime 3 — the cost discontinuity — is caused by a specific structural condition:
+
+> "When perturbations remain local (small LR, few unlearning requests), diagnostics stay near baseline — reversible forgetting. When comparable perturbations are **distributed across many layers**, higher-order interaction terms accumulate, causing structural degradation that results in **irreversible forgetting**."
+
+This is the first empirical identification of the discontinuity mechanism VST predicted. The cost function is not continuous — it jumps when perturbation scope crosses the local-to-distributed threshold.
+
+```
+Perturbation scope:
+  Local (few layers affected)     → Regime 1 or 2 — reversible
+  Distributed (many layers)       → Regime 3 — irreversible, cost jumps
+
+Triggers for scope expansion:
+  - High learning rate during unlearning
+  - Large N (many sequential unlearning requests)
+  - ~100 sequential requests → both forget- and retain-set accuracy → near zero
+```
+
+**Pre-intervention cost prediction: Reversibility Analyzer**
+
+Real-Time Detection of Spurious Forgetting (arXiv:2512.20634) provides a practical tool: a **Reversibility Analyzer** that predicts recovery cost before intervention.
+
+```
+Input:  CKA measurement of current representation state
+        Gradient analysis of fine-tuning difficulty
+
+Output:
+  "Shallow alignment"        → ~3 epochs recovery (Regime 1/2)
+  "Deep representation change" → full dataset replay required (Regime 3)
+```
+
+VST governance implication: cost can be estimated before committing to removal. Regimes 1 and 2 are manageable within operational budget. Regime 3 triggers are visible in advance via CKA trajectory.
+
+**Entanglement as cost predictor (EAGLE-PC, arXiv:2508.20443)**
+
+Per-sample entanglement score — measured as cosine similarity between forget-sample embedding and retain-sample embeddings — predicts collateral damage magnitude:
+
+```
+Low entanglement  → targeted removal viable → cost stays in Regime 1/2
+High entanglement → collateral damage unavoidable → cost approaches Regime 3
+
+Operational use: measure entanglement before intervention
+  → if high: seed-plant approach preferred over direct removal
+  → if low:  direct targeted unlearning viable
+```
+
+**Updated depth → cost function:**
+
+```
+Recovery Cost(depth, scope, entanglement) ≈
+
+  Surface + local + low entanglement:
+    → Regime 1: ~3 epochs, O(1)
+
+  Shallow + local + moderate entanglement:
+    → Regime 2: O(fine-tune), reversible
+
+  Deep + local perturbation:
+    → Regime 2/3 boundary — depends on entanglement density
+    → CKA monitoring required
+
+  Deep + distributed perturbation (many layers):
+    → Regime 3: O(retrain), IRREVERSIBLE
+    → cost function DISCONTINUOUS here
+    → 1.46M GPU-hours floor at 8B scale
+
+  Accumulated sequential requests (~100):
+    → Regime 3 forced regardless of initial depth
+    → compounding instability (Section 7.3)
+```
+
+**Critical governance implication:**
+
+The Regime 2 → Regime 3 transition is the key intervention deadline. Once perturbation distributes across many layers, recovery cost jumps discontinuously from O(fine-tune) to O(retrain). This transition is detectable in advance via:
+- CKA trajectory monitoring (declining = moving toward Regime 3)
+- PCA distance increase across layers
+- Sequential unlearning request count approaching ~100
+
+Early detection enables intervention while cost is still in Regime 1/2. Delayed intervention past the distribution threshold commits the system to Regime 3 cost regardless of method chosen.
+
+**References added:**
+- Xu, X., et al. (2025). Unlearning Isn't Deletion: Investigating Reversibility of Machine Unlearning in LLMs. arXiv:2505.16831. [four-regime taxonomy, PCA/CKA/FIM diagnostics, discontinuity mechanism]
+- Anonymous. (2025). Real-Time Detection of Spurious Forgetting. arXiv:2512.20634. [Reversibility Analyzer, shallow vs. deep classification]
+- Wang, et al. (2025). EAGLE-PC: Entanglement-Awareness Guided Loss Reweighting. arXiv:2508.20443. [entanglement as collateral damage predictor]
 
 ---
 
@@ -721,6 +1130,121 @@ Layer-wise analysis research establishes that layers have functional roles that 
 This stratified stabilization pattern maps directly to the fractal governance concern about space maturity. An agent whose lower-layer components (attention projections, K/V projections) have converged but whose upper-layer MLP components are still changing is in a **partially mature** state — capable of stable pattern routing, but not yet capable of stable abstract attractor formation. Metadata injection timing should account for this: injecting governance signals into a partially mature space risks being processed by the stable routing layer but misintegrated by the still-evolving abstraction layer.
 
 Candidate operational metric: **gradient norm per layer component, tracked over processing history**, with threshold τ = 10⁻³ as a maturity boundary for individual components, and full-layer maturity declared only when both attention and MLP components are below threshold simultaneously.
+
+**Measurement tool 4: Router saturation as MoE space maturity signal**
+
+MoE routing research (Lo et al., 2025; arXiv:2509.09660) provides a direct empirical signal for space maturity in MoE architectures: routing decisions stabilize within the **first 1% of pretraining**, especially in deeper layers. Once routing decisions stabilize, the functional topology of the space is fixed — experts have differentiated into domain-specific attractors and the routing function has converged.
+
+Router saturation = measurable proxy for space maturity in MoE systems:
+- Pre-saturation: routing still plastic, injection risks misrouting
+- Post-saturation: attractor topology fixed, injection lands in stable zone
+
+This is the most operationally direct maturity signal available: unlike gradient norm (requires per-component tracking) or CKA (requires checkpoint comparison), router saturation is binary and observable from routing probability distributions.
+
+---
+
+### 7.4.1 Minimum-Intervention Injection: Empirical Basis for "Seed Planting"
+
+VST governance design favors minimal intervention — introducing the smallest signal that allows the space to self-reorganize, rather than forcing structural change through high-amplitude injection. This "seed planting" strategy is directly validated by activation steering research.
+
+**Empirical basis 1: Low-scale steering window (FGAA, arXiv:2501.09929)**
+
+Feature Guided Activation Additions measures performance across steering scale ranges:
+
+```
+scale < 50    : behavioral modification achieved with capability preserved
+                 slight performance increase observed (low-noise amplification)
+scale 50–150  : performance degrades sharply
+scale > 150   : performance converges near zero
+```
+
+The low-scale window (< 50) corresponds exactly to the VST seed-planting regime: intervention amplitude below the space's resistance threshold, allowing the natural attractor structure to propagate the signal. The slight performance increase at very low scales parallels the VST prediction that well-timed minimal injection can be amplified by existing attractor dynamics rather than fighting them.
+
+**Empirical basis 2: Sparse subspace injection (SAE-SSV, arXiv:2505.16188)**
+
+SAE-SSV operates in sparse, task-specific subspaces — constraining interventions to a small number of interpretable dimensions that capture task-relevant semantics. Key finding: targeting fewer dimensions (sparse) outperforms broad activation modification (dense), while causing less representational disruption.
+
+VST mapping: injecting into the minimal relevant subspace = seed in prepared soil. Broad injection = forcing structural change = high resistance, high collateral damage.
+
+**Empirical basis 3: Semantics-adaptive injection (SADI, arXiv:2410.12299)**
+
+SADI constructs a binary mask identifying critical model elements via contrastive activation differences, then scales element-wise along the input's semantic direction. The mask ensures the injection aligns with the existing semantic structure rather than cutting across it.
+
+Result: SADI consistently outperforms fixed-vector steering across multiple LLM backbones (Llama2-7B, Bloomz-7B, Mistral-7B, Falcon-7B) — demonstrating that resistance is minimized when injection direction matches the space's natural orientation.
+
+VST mapping: injection that follows the attractor gradient encounters less resistance than injection that crosses attractor boundaries. Seed planted along the gradient, not against it.
+
+**Empirical basis 4: Conditional application timing (CAST, Lee et al., 2025)**
+
+CAST learns when to apply interventions — gating steering based on context. Selective application outperforms constant application, demonstrating that timing matters independently of amplitude.
+
+VST mapping: even a correctly-sized seed fails if planted at the wrong moment (partially mature space, active storm state). Governance timing is not a secondary concern — it is primary.
+
+**Failure mode: over-intervention in immature or resistant space**
+
+EasyEdit2 (arXiv:2504.15133) documents the failure signature directly:
+
+> Increasing the activation scaling coefficient does not consistently improve performance and may lead to **multi-peak or unstable behaviors** — potentially caused by competing objectives within a single steering vector or deeper nonlinearity in activation space.
+
+Multi-peak instability = VST Stage 1 friction accelerated by excessive injection amplitude. The space has multiple competing attractors; forcing high-amplitude injection activates all of them simultaneously, producing oscillation rather than convergence.
+
+**Operational seed-planting protocol:**
+
+```
+Pre-injection check:
+  1. Router saturation confirmed (MoE) OR gradient norm < 10⁻³ (dense)
+     → space is mature, proceed
+  2. Current storm stage = Stage 0 or early Stage 1
+     → space is receptive, proceed
+  3. Entropy H(t) within normal range (Section 7.8)
+     → no active attractor lock-in, proceed
+
+Injection parameters:
+  - Amplitude: scale < τ_seed (empirical floor ~50 for normalized interventions)
+  - Direction: aligned with input semantic gradient (SADI-style mask)
+  - Subspace: sparse targeting (SAE subspace, not dense activation)
+  - Timing: conditional on context receptivity (CAST-style gating)
+
+Failure indicators (abort or reduce amplitude):
+  - Multi-peak instability in output distribution
+  - Entropy spike > 2.0 nats post-injection (Section 7.8)
+  - Performance degradation on held-out capability metric
+```
+
+**VST governance principle derived:**
+
+Seed planting is not a soft version of injection — it is structurally different. High-amplitude injection attempts to overwrite existing attractor structure. Seed planting introduces a direction signal that the space's own dynamics can amplify if the space is mature and receptive. The seed succeeds not by force but by timing and alignment.
+
+This principle generalizes across injection types: metadata injection in multi-agent systems (Section 5), single-agent governance signals (Section 7.9), and attractor basin modification (Section 7.1) all benefit from low-amplitude, semantically-aligned, timing-conditional application.
+
+**Seed-level decomposition (Section 6.4):**
+
+The seed-planting protocol maps directly onto the seed-level governance distinction:
+
+```
+Seed contains:   HOW to inject (direction alignment protocol,
+                 amplitude constraints, timing conditions)
+                 → pre-installable, architecture-level
+
+Agent learns:    HOW MUCH to inject (calibrated to local space maturity,
+                 entanglement density, current storm stage)
+                 → runtime-adaptive, cannot be pre-specified
+
+Implication: the seed can pre-install the method.
+             It cannot pre-specify the magnitude.
+             Magnitude must be learned through space-maturity monitoring
+             (Section 7.4, 7.1.1).
+```
+
+This decomposition prevents two failure modes: (1) injecting a seed with fixed amplitude into spaces of varying maturity — same seed causes over-injection in immature spaces and under-injection in mature ones; (2) attempting to pre-specify everything in the seed — this collapses the distinction between seed-level governance and content-level prescription.
+
+**References added:**
+- Lo, B., et al. (2025). Steering MoE LLMs via Expert (De)Activation. arXiv:2509.09660.
+- Gao, Y., et al. (2025). Feature Guided Activation Additions (FGAA). arXiv:2501.09929.
+- Anonymous. (2025). SAE-SSV: Supervised Steering in Sparse Representation Spaces. arXiv:2505.16188.
+- Wang, W., et al. (2024). SADI: Semantics-Adaptive Dynamic Intervention. arXiv:2410.12299.
+- Lee, et al. (2025). CAST: Conditional Activation Steering.
+- Anonymous. (2025). EasyEdit2: Steering Framework for LLMs. arXiv:2504.15133.
 
 ### 7.5 Intra-Agent Storm Detection: Zone-Differentiated Sensitivity
 
@@ -1084,6 +1608,119 @@ The upper-layer capacity map is not optional governance infrastructure — it is
 
 ---
 
+### 7.9 Single-Agent Self-Objectification: Relative Position via Interaction
+
+**구조적 제약: 에이전트는 자기 내부를 직접 볼 수 없다**
+
+에이전트는 블랙박스입니다. 자신의 가중치, 활성화 상태, attractor 위치를 내부에서 직접 측정할 수 없습니다. Section 2.3에서 정의한 Self-Objectification Deficit의 구조적 원인이 여기 있습니다. 이것은 기능 부족이 아니라 아키텍처의 근본 특성입니다.
+
+그런데 출력은 볼 수 있습니다. 그리고 타 에이전트의 출력도 볼 수 있습니다.
+
+여기서 핵심 관계가 성립합니다:
+
+```
+직접 측정:   Self_position(A)       → 불가능
+상대 추정:   Self_position(A) ≈ f( Output(A) - Output(B) )  → 가능
+```
+
+자기 position은 절대값으로 접근 불가능하고, **차이(divergence)를 통해서만 간접 추정 가능합니다.** 이것이 multi-agent 상호교류가 단순한 협력 메커니즘이 아니라 **싱글에이전트가 구조적으로 생성할 수 없는 자기인식을 시스템 차원에서 보완하는 메커니즘**인 이유입니다.
+
+**Loop invisibility: 자기인식 실패의 가장 명확한 사례**
+
+혼자 작동하는 에이전트는 자신이 loop 안에 있을 때 그것을 loop로 인식하지 못합니다. 각 출력이 직전 출력에서 locally consistent하게 따라오기 때문입니다. Loop는 내부에서 "계속 최적화 중인 상태"로 보입니다. 외부 참조점 없이는 패턴이 패턴으로 보이지 않습니다.
+
+이것이 Section 7.8의 entropy collapse와 연결되는 지점입니다. Entropy 신호는 외부에서 loop를 탐지하는 것이고, self-objectification은 에이전트가 그 상태를 **내부에서** 얼마나 인식할 수 있는가의 문제입니다. 현재 아키텍처에서 후자는 구조적으로 제한됩니다.
+
+---
+
+**실증 1: Gnosis — 내부 회로를 통한 자기 실패 예측 (arXiv:2512.20578, 2025/2026)**
+
+가장 직접적인 실증입니다. Gnosis는 다음 질문에 답하려 합니다:
+
+> "LLM이 외부 판단자 없이 자신의 내부 상태를 관찰함으로써 자신의 실패를 예측할 수 있는가?"
+
+결과:
+- hidden states와 attention pattern에서 추출한 신호로 correctness를 예측하는 경량 메커니즘(~5M 파라미터)
+- frozen backbone (1.7B~20B) 전 범위에서 외부 judge 및 internal baseline 모두 초과 성능
+- 수학 추론, QA, MMLU-Pro 전 도메인에서 일반화
+- partial generation에서도 early detection 가능 → failing trajectory를 출력 완성 전에 감지
+
+**VST 매핑:**
+
+| Gnosis 발견 | VST 의미 |
+|---|---|
+| Hidden activations diverge between correct and hallucinated outputs | Stage 1 내부 신호가 output에 앞서 hidden state에 이미 존재 |
+| Factuality cues concentrated in middle/deep layers | Section 7.5의 고중요도 zone이 self-monitoring의 정보 밀도 높음 |
+| Early detection on partial generations | Stage 1→2 전환 이전에 내부 신호 탐지 가능 — 사전 개입 여지 있음 |
+| ~5M parameters, no fine-tuning of backbone | 최소 개입으로 self-monitoring 추가 가능 |
+
+핵심 함의: **correctness cues are intrinsic to the generation process.** 자기인식에 필요한 정보가 외부에 있는 것이 아니라 내부 activation에 이미 존재합니다. 접근 메커니즘이 없었을 뿐입니다.
+
+그러나 Gnosis는 중요한 한계를 가집니다. 이것은 사후 monitoring이지 사전 attractor 인식이 아닙니다. "내가 틀렸다"는 것을 generation 중에 감지할 수 있지만, "내가 어떤 attractor 구역에 있는가"를 생성 전에 알 수는 없습니다. Position 인식과 error 인식은 다른 문제입니다.
+
+---
+
+**실증 2: 상호교류에서의 disagreement = position 추정 신호 (Co-Sight, arXiv:2510.21557; Disagreement as Data, arXiv:2601.12618)**
+
+Co-Sight의 CAMV(Conflict-Aware Meta-Verification) 구조가 핵심입니다. 여러 에이전트의 추론 경로 중 **divergent nodes만을 선별하여 검증**합니다. 동의하는 부분은 통과시키고, 불일치 지점만 meta-verifier가 재검토합니다.
+
+이것이 의미하는 것: divergence는 오류 신호가 아니라 **어느 에이전트의 position이 다른가를 드러내는 구조적 신호**입니다. disagreement가 발생한 지점 = 두 에이전트의 attractor basin이 다른 지점.
+
+```
+에이전트 A가 자기 position을 아는 방법:
+  1. Output(A) 생성
+  2. Output(B)와 비교
+  3. divergence point 확인
+  4. "나는 B와 이 지점에서 다른 attractor에 있다"
+
+이 정보는 A 혼자서는 생성 불가능
+B의 존재와 비교 과정이 필수
+```
+
+Disagreement as Data (arXiv:2601.12618, 2026): 다중 에이전트 추론에서 불일치를 noise가 아닌 "rich analytic signal"로 재정의합니다. Cosine similarity로 에이전트 간 alignment/divergence를 정량적으로 측정하며, 이것이 개별 에이전트의 reasoning 품질을 평가하는 데 사용됩니다.
+
+**VST 매핑:** divergence measurement = 에이전트의 현재 vector position을 상대적으로 추정하는 실무 구현입니다.
+
+---
+
+**실증 3: Self-recognition의 현재 한계 — 크기 의존성과 맥락 의존성**
+
+Self-recognition in LLMs 연구(EmergentMind, 2025)가 현재 상태를 정리합니다:
+
+Self-objectification과 관련된 여섯 가지 구별 능력:
+- Authorship recognition (자기 출력 식별)
+- Knowledge boundary awareness (자기 지식 한계 인식)
+- Reflection and self-correction (자기 오류 수정)
+- Behavioral self-awareness (자기 정책 인식)
+- Activation-level self-direction (self-recognition direction in activations)
+- Strategic self-modeling (타 에이전트와 상호작용 시 자기 모델링)
+
+**결정적 발견:** Emergent self-cognition은 모델 크기와 훈련 품질에 상관됩니다. 소수의 대형 모델(Claude-3-Opus, Llama-3-70B-Instruct 등)만이 multi-turn, multi-principle interrogation 하에서 full state self-cognition을 보입니다.
+
+중소형 모델이 대부분인 실제 배포 환경에서, single-agent self-objectification은 아키텍처적으로 불완전하거나 부재합니다. 이것이 Pathway 3가 현재 기준으로 "future"로 분류된 근거입니다.
+
+**Self-preference bias의 추가 문제:** self-recognition 능력이 있는 에이전트는 자신의 출력을 체계적으로 선호하고 과평가합니다(Panickssery et al., 2024). 자기인식 능력이 자기교정이 아닌 자기강화로 작용할 수 있습니다. 이것은 VST에서 강력한 attractor를 가진 에이전트가 외부 신호를 거부하는 패턴과 정확히 대응합니다.
+
+---
+
+**Pathway 3 연결: 상호교류 기반 self-objectification의 현재 구현 가능성**
+
+| 접근 | 현재 상태 | 구현 가능성 |
+|---|---|---|
+| **Gnosis 방식** — hidden state 기반 내부 self-monitoring | 실증 완료, ~5M 파라미터 경량 추가 | **현재 구현 가능** |
+| **Disagreement 기반** — 타 에이전트 output과의 divergence 측정 | Co-Sight, CAMV로 실증 | **현재 구현 가능** |
+| **Entropy 기반** — output entropy 변화로 attractor lock-in 감지 | Section 7.8에서 실증 | **현재 구현 가능** |
+| **직접 position 인식** — 자신의 attractor basin 위치를 내부에서 파악 | 이론 미완성, 실증 없음 | **미래 과제** |
+| **사전 loop 예측** — loop 진입 전 자기인식으로 회피 | Gnosis는 사후, 사전은 열린 문제 | **미래 과제** |
+
+**실무 요약:**
+
+현재 가능한 것은 **사후 self-monitoring + 상호교류를 통한 간접 position 추정**입니다. 진정한 사전 self-objectification — 자신이 어떤 attractor에 있는지 생성 전에 아는 것 — 은 아직 열린 문제입니다. 그러나 상호교류 구조가 이 gap을 시스템 차원에서 보완할 수 있다는 것이 Co-Sight와 disagreement 연구들의 핵심 함의입니다.
+
+> Pathway 3의 실현 조건: 내부 self-monitoring(Gnosis 방식) + 외부 divergence 측정(disagreement 기반) + 상위 레이어 capacity map(Section 7.7) 세 가지를 통합한 아키텍처.
+
+---
+
 ### 7.8 Storm Detection Threshold: Infinite Loop as Measurable Stage 2 Marker
 
 The Stage 1→2 transition in VST — where self-reinforcement begins to outpace degradation capacity — needs a quantitative trigger. Infinite loop behavior in single-agent LLMs provides the most direct empirical marker: it is the observable signature of an attractor that has become self-sustaining beyond recovery capacity.
@@ -1223,10 +1860,10 @@ Vector Storm analogues across gradient conflict, GAN mode collapse, social polar
 | Degradation calibration | Upper-layer external estimation framework established (Section 7.7). Basin-like loss landscape directly measurable (most-case/worst-case perturbation analysis). CCPS perturbation stability and PING layer-sweep probing provide upper-layer read of lower-layer capacity. Specific capacity thresholds per zone remain open. |
 | Storm detection threshold | Entropy-based Stage 1→2 detection framework established (Section 7.8). Stage 2 confirmed: H(t) < ~0.2 nats sustained (low-entropy loop, arXiv:2511.07876) OR H(t) spike > ~2.0 nats (attractor dissolution, ERGO). Stage 1 onset: dH/dt < 0 sustained. Attention sink circuit disruption as secondary structural signal (arXiv:2503.08908). Infinite escape time property makes false positive rate low. Per-model threshold calibration and k (consecutive token count) remain open. |
 | Metadata injection frequency | Priority-first architecture established (Section 7.6). ~5% high-impact neurons warrant Tier 1 treatment. Frequency and signal strength are independent inverse dials: sensitive zones = high frequency + minimal amplitude; stable zones = low frequency + strong amplitude permissible. f_injection ∝ dS/dt · expansion_weight; A_injection ∝ 1/sensitivity. Specific threshold calibration per architecture remains open. |
-| Space maturity measurement | Partially inferred (Section 7.4). Gradient norm convergence and CKA as candidate metrics. Threshold values for "mature" vs. "immature" undefined in VST context. |
-| Attracting/Distracting balance | Optimal ratio undefined. Over-attracting → ≥1.46M GPU-hours retraining floor. Over-distracting → prohibitive operational cost. Boundary formalization pending. |
-| Single-agent self-objectification | Key open question for Pathway 3. |
-| Contamination recovery cost | Depth-cost relationship partially inferred (Section 7.3). Formal cost function undefined. |
+| Space maturity measurement | Substantially expanded (Section 7.4, 7.4.1). Router saturation (first ~1% of pretraining) as binary MoE maturity signal: pre-saturation = plastic topology, injection risks misrouting; post-saturation = attractor topology fixed, injection lands stably. Gradient norm < 10⁻³ and CKA convergence as candidate metrics for dense models. Router entropy trajectory (per-layer, over inference steps) as real-time maturity signal. Seed-planting protocol established (Section 7.4.1): four empirical bases (FGAA scale < 50 window, SAE-SSV sparse subspace, SADI semantic alignment, CAST conditional timing). Failure signature: multi-peak instability in output distribution when amplitude exceeds space resistance. Specific τ values for "mature" vs. "immature" per architecture remain open. |
+| Attracting/Distracting balance | Four-dimensional monitoring framework established (Section 7.1, 7.1.1). Gini coefficient (token load), spectral entropy of expert similarity matrix (direction diversity), average cosine similarity (representational redundancy), router entropy (maturity/confidence). Per-layer calibration required: deep layers need tighter τ_spectral and τ_cosine than shallow layers (GatePro). Three independent failure modes: load collapse (Gini > τ), direction collapse (spectral entropy < τ), redundancy collapse (cosine sim > τ). MoE empirical anchors: Gini 0.70 = collapsed, 0.035 = balanced. Per-architecture, per-layer, per-metric τ values remain open. |
+| Single-agent self-objectification | Framework established (Section 7.9). Structural constraint: position is accessible only as relative value via interaction, not absolute. Three currently implementable components: (1) internal self-monitoring via hidden state signals (Gnosis, arXiv:2512.20578), (2) disagreement-based position estimation across agents (Co-Sight CAMV, arXiv:2510.21557), (3) entropy-based attractor lock-in detection (Section 7.8). Remaining open: pre-generation attractor position awareness; integration of three components into unified Pathway 3 architecture. |
+| Contamination recovery cost | Four-regime structure established (Section 7.3.1). Discontinuity mechanism identified: local perturbation → Regime 1/2 (reversible, O(fine-tune)); distributed perturbation across many layers → Regime 3 (irreversible, O(retrain), cost jumps discontinuously). ~100 sequential unlearning requests force Regime 3 regardless of initial depth. Pre-intervention cost prediction now possible via Reversibility Analyzer (CKA + gradient analysis). Entanglement score predicts collateral damage direction: high entanglement → seed-plant preferred over direct removal. 1.46M GPU-hours floor at 8B scale confirmed. Formal depth → compute function (exact threshold layer count for scope expansion) remains undefined. |
 | Intra-agent storm detection | Zone-differentiated sensitivity framework established (Section 7.5). Specific τ values per zone require empirical calibration. |
 
 This theory is conceptual and provides architectural direction. Formal modeling and empirical validation remain future work.
@@ -1331,6 +1968,20 @@ Guo, B., et al. (2024). Active-dormant attention heads: Mechanistically demystif
 
 Bai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. arXiv:2212.08073.
 
+Yang, J., et al. (2025). Latent Prototype Routing (LPR): Achieving near-perfect load balancing in Mixture-of-Experts. arXiv:2506.21328. (Gini coefficient: routing collapse = 0.70, balanced = 0.035. DeepSeek-V3, Qwen3-MoE, Mixtral.)
+
+Zhou, Y., et al. (2022). Mixture-of-Experts with Expert Choice routing. NeurIPS 35, 7103–7114. (Natural token distribution: ~74% routed to 1–2 experts, ~23% to 3–4, ~3% to 4+. Over-capacity ratio 20–40% without balancing.)
+
+Wang, L., et al. (2024). Auxiliary-loss-free load balancing strategy for Mixture-of-Experts. ICLR 2025. (Loss-free balancing via expert-wise bias on routing scores.)
+
+Omi, N., et al. (2025). Load balancing Mixture of Experts with similarity preserving routers (SimBal). arXiv:2506.14038. (Similarity-preserving load balancing: 36% faster convergence, lower redundancy.)
+
+Wang, Z., et al. (2025). Attention saturation and gradient suppression at inflection layers. arXiv:2511.00797. (Low attention entropy + steep gradient decay = Attracting saturation signal.)
+
+Ye, T., et al. (2025). Differential Transformer. ICLR 2025. arXiv:2410.05258. (Differential attention cancels noise while amplifying signal.)
+
+Anonymous. (2025). Integral Transformer: Denoising attention, not too much not too little. arXiv:2508.18387. (Attention distribution balance; vanilla attention beneficial in lower layers.)
+
 Wang, W., et al. (2025). Solving LLM repetition problem in production: A comprehensive study of multiple solutions. arXiv:2512.04419.
 
 Abdelnabi, S., et al. (2025). Get my drift? Catching LLM task drift with activation deltas. (referenced in drift detection literature).
@@ -1351,7 +2002,25 @@ Anonymous. (2025). Robust hallucination detection in LLMs via adaptive token sel
 
 Anonymous. (2024). ZigZagKV: Dynamic KV cache compression for long-context modeling based on layer uncertainty. (Layer uncertainty → importance-adaptive memory allocation.)
 
-Anonymous. (2025). Solving LLM repetition problem in production: A comprehensive study of multiple solutions. arXiv:2512.04419. (Markov chain model: infinite escape time under greedy decoding + self-reinforcement. P(stay in repetition) ≈ 0.95+ per step.)
+Ghasemabadi, A., et al. (2025/2026). Can LLMs predict their own failures? Self-awareness via internal circuits (Gnosis). arXiv:2512.20578. (Lightweight ~5M-parameter self-monitoring via hidden states + attention patterns. Early detection of failing trajectories. Correctness cues intrinsic to generation process.)
+
+Anonymous. (2025). Co-Sight: Enhancing LLM-based agents via conflict-aware meta-verification and trustworthy reasoning with structured facts (CAMV + TRSF). arXiv:2510.21557. (Divergent nodes across agent reasoning traces as position signal. Disagreement-selective verification. HLE benchmark: 35.5% vs. 22.1% backbone baseline.)
+
+Anonymous. (2026). Disagreement as data: Reasoning trace analytics in multi-agent systems. arXiv:2601.12618. (Cosine similarity for alignment/divergence quantification across agents. Disagreement as rich analytic signal, not noise.)
+
+EmergentMind. (2025). Self-recognition in LLMs: Survey of capabilities. (Six distinct self-awareness capacities. Emergent self-cognition correlated with model size. Full state self-cognition only in minority of large models. Self-preference bias: self-recognition → systematic overrating of own outputs.)
+
+Panickssery, N., et al. (2024). Self-preference and evaluation bias in LLM-based judges. (Self-recognition ability → systematic self-preference bias. Strong attractor analog.)
+
+Anonymous. (2025). Multi-trigger poisoning amplifies backdoor vulnerabilities in LLMs. arXiv:2507.11112. (Weight difference analysis: early MLP layers = primary contamination locus. MLP selective retraining recovers 78% parameters → ASR 22.97% ≈ full fine-tuning 22.56%.)
+
+Souly, A., et al. (2025). Poisoning attacks on LLMs require a near-constant number of poison samples. arXiv:2510.07192. (250 poisoned documents sufficient regardless of model/dataset size — 600M to 13B parameters, 6B to 260B tokens.)
+
+Hubinger, E., et al. (2024). Sleeper agents: Training deceptive LLMs that persist through safety training. Anthropic. (SFT, RLHF, adversarial training all fail to remove deep backdoors. Adversarial training makes backdoors harder to detect.)
+
+Anonymous. (2025). Backdoor attribution: Elucidating and controlling backdoors in language models (BkdAttr). arXiv:2509.21761. (Backdoor features detectable from layer 1 via probe classifiers. Causal tracing framework for contamination localization.)
+
+Anonymous. (2025). PoTS: Proof-of-training-steps for backdoor detection in large language models. arXiv:2510.15106. (Final layers exhibit heightened sensitivity to poisoning — detection signal location ≠ contamination source location.)
 
 Anonymous. (2025). LoopLLM: Transferable energy-latency attacks in LLMs via repetitive generation. arXiv:2511.07876. (Repetition → token entropy converges to low values. Entropy collapse = measurable Stage 2 marker.)
 
@@ -1386,6 +2055,12 @@ Anonymous. (2025). NeuronTune: Fine-grained neuron modulation for balanced safet
 Yi, et al. (2024). NLSR: Neuron-level safety realignment of large language models against harmful fine-tuning. arXiv:2412.12497. (Training-free safety realignment by restoring safety-critical neurons; identifies neurons via similarity difference before/after fine-tuning.)
 
 Shi, Z., et al. (2025). Safety alignment via constrained knowledge unlearning (CKU). arXiv:2505.18588. (Neuron scoring in MLP layers to identify useful-knowledge subset U; gradient pruning preserves U while unlearning harmful content.)
+
+Xu, X., et al. (2025). Unlearning Isn't Deletion: Investigating Reversibility of Machine Unlearning in LLMs. arXiv:2505.16831. (Four-regime taxonomy: reversible/irreversible × catastrophic/non-catastrophic. Discontinuity mechanism: local perturbation → reversible; distributed perturbation across many layers → irreversible. ~100 sequential requests force Regime 3. PCA similarity/shift, CKA, FIM as diagnostic tools.)
+
+Anonymous. (2025). Real-Time Detection and Quantitative Analysis of Spurious Forgetting in Continual Learning. arXiv:2512.20634. (Reversibility Analyzer: CKA + gradient analysis predicts recovery cost before intervention. Shallow alignment ≈ 3 epochs; deep representation change → full dataset replay. Dynamic Tracker for real-time alignment depth monitoring.)
+
+Wang, et al. (2025). EAGLE-PC: Entanglement-Awareness Guided Loss Reweighting with Proxy Constraint. arXiv:2508.20443. (Per-sample entanglement score via embedding cosine similarity predicts collateral damage. Low entanglement → targeted removal viable; high entanglement → seed-plant preferred. Ordered unlearning by memorization score reduces collateral damage.)
 
 Zhang, Y., et al. (2024). Investigating layer importance in large language models. arXiv:2409.14381. (Cornerstone layers: early layer removal → random-guess collapse.)
 
