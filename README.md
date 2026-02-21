@@ -246,7 +246,7 @@ The equation identifies exactly four ways to reduce S:
 
 DFG's preferred direction is not 1 (suppressing n) but 2–4: making the system capable of absorbing the instability that comes with genuine exploration. Constraining n is a governance failure mode — it trades instability for stagnation.
 
-This equation is a conceptual abstraction, not a fully parameterized physical model. Formal calibration of α, β, and C(t) as measurable quantities remains an open problem (Section 11).
+This equation is a conceptual abstraction, not a fully parameterized physical model. Formal calibration of α, β, and C(t) as measurable quantities remains an open problem (Section 7).
 
 ### 3.3 The Residual Degradation Floor
 
@@ -289,6 +289,8 @@ Intermediate layers often surpass the final layer by up to 16% in downstream acc
 Earlier layers capture local syntactic patterns while later layers are responsible for high-level abstraction and reasoning. The implication is that the residual degradation floor is not a governance failure to be corrected — it is the structural condition that makes hierarchical processing possible. Attempting to eliminate it would collapse the abstraction hierarchy.
 
 The governance implication is precise: **the residual floor defines the minimum noise baseline that any intervention must accept.** Metadata injection and degradation protocols should be calibrated against this floor, not against a zero-noise target. Interventions that attempt to push below the structural floor will either fail or damage the abstraction capacity that makes the lower layer functional.
+
+This floor also defines the lower bound of the "HOW MUCH to degrade" problem in seed-level governance (Section 6.4): the agent cannot learn a degradation magnitude below what the structural floor permits. The seed can encode the process; the floor constrains the minimum achievable result.
 
 ### 3.4 Intervention Timing Tradeoff
 
@@ -600,9 +602,126 @@ A key limitation of current CAI from a seed-level governance perspective is inje
 
 This gap motivates the distinction DFG draws between seed as training-time principle embedding and seed as runtime governance signal. Current systems have the former; fractal governance requires both — a stable trained seed that defines degradation methodology, plus a runtime seed-refresh channel that allows the governance layer to update calibration thresholds without full retraining.
 
+> **For empirical grounding** of the mechanisms described in Sections 1–6, see [Appendix A](#appendix-a-empirical-grounding). Each theoretical construct is mapped to measurable phenomena in current single-agent LLM research.
+
 ---
 
-## 7. Attracting / Distracting Cycle
+
+## 8. Core Assumptions
+
+*(Section 7 — Attracting / Distracting Cycle and empirical grounding — has been moved to [Appendix A](#appendix-a-empirical-grounding).)*
+
+1. Agents optimize locally, not globally.
+2. Vector fields are neutral; instability arises from conflict between incompatible orientations.
+3. Conflict triggers self-reinforcement as the default response, because attractor basin dynamics point inward.
+4. Degradation capacity varies by layer: policy containment (upper), operational containment (middle), minimal containment (lower).
+5. Lower agents lack sufficient self-objectification; this typically requires periodic metadata injection.
+6. Vector space is a layered accumulation structure; pinpoint removal is not reliably achievable without collateral damage.
+7. Diversity scaling pressure grows super-linearly (conceptual model).
+8. Intervention timing involves a monitoring vs. degradation tradeoff.
+9. Influence propagates structurally through network connectivity.
+10. Hub vulnerability increases propagation speed and reach.
+11. Layered mediation reduces amplification probability.
+12. Accumulated instability increases long-term correction cost.
+13. The lowest fractal layer retains a residual degradation state. Zero-storm is not a valid design target.
+14. The attracting/distracting cycle operates continuously. Distracting is structurally more expensive than attracting.
+15. Vector Storm operates at two scales simultaneously — intra-agent and inter-agent — consistent with fractal architecture. The mechanism is identical; only the scope of impact differs.
+16. The structural opposite of Vector Storm is the Vector Convergence Zone — a stable manifold where global solution structure is replicated as local attractors at every scale, exploration is maximized, and governance cost is minimized.
+17. Fractal governance optimizes for simultaneous VCZ at system and agent levels. This is the condition of minimum risk, minimum cost, and maximum utility — not a fixed equilibrium but a dynamically maintained attractor region.
+18. φ (value yield per unit of exploration) is the central variable in the governance objective function. φ ≈ P(exploration → stable vector): the probability that a unit of exploration converts from noise into a stable, useful vector. n is recoverable; φ is architectural. Governance errors that damage φ are more costly to reverse than governance errors that reduce n.
+19. VCZ is primarily a φ-maximization zone, not a stability zone. Stability is the byproduct of φ maximization, not the primary objective. The difference in utility between well-governed and poorly-governed systems is explained more by φ than by n.
+
+---
+
+## 9. Structural Correspondence to Dynamical Systems
+
+These are structural correspondences, not formal proofs of equivalence.
+
+| Theory Concept | Dynamical Systems Concept | Description |
+|---|---|---|
+| Local Attractor | Attractor | Stable state toward which trajectories converge |
+| Vector Field | Vector Field | Direction and magnitude at each point in state space |
+| Vector Storm | Chaotic regime / Basin boundary collision | Instability at boundary between competing basins |
+| Stability shift | Bifurcation | Qualitative change at a critical parameter |
+| Degradation capacity | Basin containment capacity | Size and robustness of attractor basin |
+| Self-correction | Asymptotic return tendency (cf. Lyapunov stability) | Return toward equilibrium after perturbation; structural analogue, no differentiability assumed |
+| Attracting | Basin of attraction | Capture of trajectories into structured orbit |
+| Distracting | Repelling dynamics / basin escape | Dissolution of misaligned trajectories |
+| Immature vector space | Narrow basin of attraction | Small perturbation causes basin exit |
+| Vector Convergence Zone (VCZ) | Stable manifold / Lyapunov stable region | Region from which perturbations self-correct without external intervention; exploration maximized within zone |
+| VCZ boundary | Fractal basin boundary | Transition from stable to unstable is self-similar across scales, not a sharp threshold (arXiv:2501.04286) |
+| Global solution → local attractor replication | Hierarchical attractor nesting | Each layer's dominant basin aligned with global attractor; passive self-correction at all scales |
+
+---
+
+## 10. Analogues in Other Domains
+
+### 10.1 Multi-Agent and System-Level Analogues
+
+**Gradient conflict in multi-task learning.** Competing gradient directions in shared parameter space exhibit a structural analogue of Vector Storm. When gradients from different task objectives conflict, standard optimization diverges — requiring gradient surgery or task-weighted averaging as a form of degradation before signals enter shared space (Yu et al., 2020). The conflicting-gradient problem has been formalized as multi-objective optimization, where tasks compete and trade-offs are unavoidable without explicit mediation (Sener & Koltun, 2018).
+
+**Mode collapse in GANs.** Generator and discriminator form competing attractors during adversarial training (Goodfellow et al., 2014). When one dominates, diversity collapses — a structural analogue of Vector Storm resolving through attractor dominance. Theoretical analysis confirms that this instability arises at the boundary between competing optimization landscapes, structurally analogous to basin boundary collision (Arjovsky & Bottou, 2017).
+
+**Echo chambers in social networks.** Algorithmic amplification acts as hub vulnerability multiplier. Self-reinforcement deepens orientation through confirmation bias and selective exposure (Nguyen, 2020). The result is system-level polarization — structurally analogous to Stage 3 Vector Storm, where reinforcing dynamics outpace any corrective mechanism (Baumann et al., 2020).
+
+**Cytokine storm in immune systems.** Self-amplification loop outpaces regulatory capacity — structurally analogous to the reinforcement-outpaces-degradation dynamic defining Vector Storm (Fajgenbaum & June, 2020). The cytokine storm is characterized by an initial perturbation that triggers cascading immune activation beyond the system's ability to self-regulate, mirroring the Stage 2–3 propagation pathway described in this theory (Yiu et al., 2012).
+
+### 10.2 Single-Agent Internal Analogues
+
+When an LLM processes ambiguous input, multiple attention heads may converge toward different interpretations — creating competing internal attractors in degraded form (Michel et al., 2019). Empirical analysis of multi-head attention has shown that individual heads specialize in distinct syntactic and semantic functions; when these specializations conflict under ambiguous input, the model must implicitly arbitrate between competing vector orientations. Studies on head pruning demonstrate that many heads are redundant under unambiguous input but become critical under high-context ambiguity — consistent with the prediction that immature containment capacity surfaces only under high-intensity, conflicting input.
+
+## 11. Limitations and Open Problems
+
+| Problem | Description |
+|---|---|
+| Degradation calibration | Upper-layer external estimation framework established (Appendix A.7). Basin-like loss landscape directly measurable (most-case/worst-case perturbation analysis). CCPS perturbation stability and PING layer-sweep probing provide upper-layer read of lower-layer capacity. Asymptotic lower bound formalized (Section 3.3): C(t) cannot exceed C_max imposed by lowest-layer minimum-viable degradation state; calibration target is floor-relative, not zero-noise. This floor also sets the hard lower bound on learnable degradation magnitude in seed-level governance (Section 6.4). Specific capacity thresholds per zone remain open. |
+| Storm detection threshold | Entropy-based Stage 1→2 detection framework established (Appendix A.8). Stage 2 confirmed: H(t) < ~0.2 nats sustained (low-entropy loop, arXiv:2511.07876) OR H(t) spike > ~2.0 nats (attractor dissolution, ERGO). Stage 1 onset: dH/dt < 0 sustained. Attention sink circuit disruption as secondary structural signal (arXiv:2503.08908). Infinite escape time property makes false positive rate low. Per-model threshold calibration and k (consecutive token count) remain open. |
+| Metadata injection frequency | Priority-first architecture established (Appendix A.6). ~5% high-impact neurons warrant Tier 1 treatment. Frequency and signal strength are independent inverse dials: sensitive zones = high frequency + minimal amplitude; stable zones = low frequency + strong amplitude permissible. f_injection ∝ dS/dt · expansion_weight; A_injection ∝ 1/sensitivity. Specific threshold calibration per architecture remains open. |
+| Space maturity measurement | Substantially expanded (Appendix A.4, 7.4.1). Router saturation (first ~1% of pretraining) as binary MoE maturity signal: pre-saturation = plastic topology, injection risks misrouting; post-saturation = attractor topology fixed, injection lands stably. Gradient norm < 10⁻³ and CKA convergence as candidate metrics for dense models. Router entropy trajectory (per-layer, over inference steps) as real-time maturity signal. Seed-planting protocol established (Appendix A.4.1): four empirical bases (FGAA scale < 50 window, SAE-SSV sparse subspace, SADI semantic alignment, CAST conditional timing). Failure signature: multi-peak instability in output distribution when amplitude exceeds space resistance. Specific τ values for "mature" vs. "immature" per architecture remain open. |
+| Attracting/Distracting balance | Four-dimensional monitoring framework established (Appendix A.1, 7.1.1). Gini coefficient (token load), spectral entropy of expert similarity matrix (direction diversity), average cosine similarity (representational redundancy), router entropy (maturity/confidence). Per-layer calibration required: deep layers need tighter τ_spectral and τ_cosine than shallow layers (GatePro). Three independent failure modes: load collapse (Gini > τ), direction collapse (spectral entropy < τ), redundancy collapse (cosine sim > τ). MoE empirical anchors: Gini 0.70 = collapsed, 0.035 = balanced. Per-architecture, per-layer, per-metric τ values remain open. |
+| Single-agent self-objectification | Framework established (Appendix A.9). Structural constraint: position is accessible only as relative value via interaction, not absolute. Three currently implementable components: (1) internal self-monitoring via hidden state signals (Gnosis, arXiv:2512.20578), (2) disagreement-based position estimation across agents (Co-Sight CAMV, arXiv:2510.21557), (3) entropy-based attractor lock-in detection (Appendix A.8). Remaining open: pre-generation attractor position awareness; integration of three components into unified Pathway 3 architecture. |
+| Contamination recovery cost | Four-regime structure established (Appendix A.3.1). Discontinuity mechanism identified: local perturbation → Regime 1/2 (reversible, O(fine-tune)); distributed perturbation across many layers → Regime 3 (irreversible, O(retrain), cost jumps discontinuously). ~100 sequential unlearning requests force Regime 3 regardless of initial depth. Pre-intervention cost prediction now possible via Reversibility Analyzer (CKA + gradient analysis). Entanglement score predicts collateral damage direction: high entanglement → seed-plant preferred over direct removal. 1.46M GPU-hours floor at 8B scale confirmed. Formal depth → compute function (exact threshold layer count for scope expansion) remains undefined. |
+| Intra-agent storm detection | Zone-differentiated sensitivity framework established (Appendix A.5). Specific τ values per zone require empirical calibration. |
+
+This theory is conceptual and provides architectural direction. Formal modeling and empirical validation remain future work.
+
+---
+
+## Relationship to Other Theories
+
+**deficit-fractal-governance (parent framework)**
+
+- Three-Layer Governance Architecture
+  - Vector Storm Theory ← this document
+  - Network Architecture Theory (separate document)
+  - Recovery Theory (separate document)
+  - Prediction Model (separate document)
+
+Diversity Expansion → Scaling Pressure → Vector Storm Risk. Diversity is beneficial. But diversity without proportional degradation capacity produces structural instability. The governance challenge is not storm elimination, but maintaining:
+
+**Growth Benefit > Instability Cost**
+
+Design target: keep storms localized, degradable, and non-recursive while preserving exploration benefits.
+
+---
+
+## What Happens After a Vector Storm
+
+A system that has experienced a full Vector Storm often enters a post-storm state with reduced diversity and degraded containment capacity. Affected agents cannot generally undo the damage — consistent with the irreversibility observed in neural network contamination and catastrophic forgetting contexts. Degradation capacity must be rebuilt through suppression, isolation+relearning, or gradual dilution before re-expansion can safely occur.
+
+**Governance is not the absence of storm. It is the capacity to grow through it.**
+
+---
+
+
+---
+
+## Appendix A: Empirical Grounding
+
+> This appendix maps each theoretical construct in Sections 1–6 to measurable phenomena in existing single-agent LLM research. The mechanisms VST describes are observable at smaller scale today. The theory is complete without this appendix; it serves as an evidence layer for readers who want empirical anchoring.
+
+---
+
 
 - **ATTRACTING:** Noise → Vector (signals drawn into attractor basins)
 - **DISTRACTING:** Vector → Noise (misaligned vectors dissolved)
@@ -611,7 +730,7 @@ Noise → [Attracting] → Vector → [if misaligned] → Noise / [if aligned] �
 
 At the limit, routing-relevant classification decisions can be interpreted as attracting- or distracting-dominant operations — connecting this cycle to the four-type data classification described in Network Architecture Theory.
 
-### 7.1 Cost Asymmetry
+### A.1 Cost Asymmetry
 
 Distracting is structurally more expensive than attracting. Attracting draws unstructured signals into an existing basin — the signal is pulled in by basin dynamics with minimal active effort. Distracting must dissolve an already-formed vector with an established reinforcement history and possibly accumulated metadata built on top of it.
 
@@ -629,7 +748,7 @@ Exact unlearning (the gold-standard equivalent of complete Distracting) requires
 
 The existence of an entire research field — machine unlearning — dedicated to approximate Distracting (removing contamination without full retraining) is itself evidence of the cost asymmetry. Gradient ascent on forget sets, PEFT-based weight modification, in-context unlearning, and activation scrubbing are all engineering attempts to achieve partial Distracting at reduced cost. Each method trades completeness of removal against computational budget — exactly the Attracting/Distracting balance problem at the training-data level.
 
-The inferred implication for balance: a system that over-attracts (integrates too readily without sufficient Distracting capacity) accumulates contamination that eventually requires full retraining to resolve. A system that over-distracts (applies maximum Distracting to every signal) is operating at a cost level that scales toward 1.46M GPU-hours per correction cycle. The optimal balance sits between these two failure modes — sufficient Distracting to prevent contamination accumulation, insufficient to require full retraining for routine corrections. Formalizing this boundary remains an open problem (Section 11).
+The inferred implication for balance: a system that over-attracts (integrates too readily without sufficient Distracting capacity) accumulates contamination that eventually requires full retraining to resolve. A system that over-distracts (applies maximum Distracting to every signal) is operating at a cost level that scales toward 1.46M GPU-hours per correction cycle. The optimal balance sits between these two failure modes — sufficient Distracting to prevent contamination accumulation, insufficient to require full retraining for routine corrections. Formalizing this boundary remains an open problem (Section 7).
 
 **MoE Routing as Structural Analogue: Empirical Balance Distribution**
 
@@ -713,7 +832,7 @@ Balanced condition:       Gini(expert_load) < τ_balance  (~0.035–0.1)
                           → maintain current Attracting/Distracting ratio
 
 Over-distract condition:  min-max load ratio < τ_min  (approaching 1e-6)
-                          AND performance degradation
+                          AND capability loss on held-out metric
                           → reduce Distracting, allow attractor formation
 ```
 
@@ -721,7 +840,7 @@ Specific τ values require per-architecture calibration. The structural shape of
 
 ---
 
-### 7.1.1 Multi-Dimensional Threshold Calibration: Beyond Gini
+### A.1.1 Multi-Dimensional Threshold Calibration: Beyond Gini
 
 Gini coefficient alone is insufficient as a balance threshold. Gini measures **token distribution across experts** — how many tokens each expert receives. It does not capture **vector direction structure** — whether experts that receive similar numbers of tokens are actually doing different work. A system with Gini = 0.035 (near-perfect load balance) can still be in attractor collapse if all experts have converged to similar representations.
 
@@ -729,7 +848,7 @@ Three independent measurement axes are required, each capturing a distinct failu
 
 **Axis 1: Gini coefficient — token load distribution**
 
-Already established (Section 7.1). Measures routing skew. Catches over-attraction at the load level.
+Already established (Appendix A.1). Measures routing skew. Catches over-attraction at the load level.
 
 ```
 τ_gini_collapse  ≈ 0.70  (empirical ceiling — LPR, arXiv:2506.21328)
@@ -780,10 +899,10 @@ Router entropy DECREASING over generation steps  → routing decisions are stabi
                                                     = space is converging, maturing
 Router entropy STABLE LOW                        → mature space, confident routing
 Router entropy HIGH with FLUCTUATIONS            → immature or destabilized space
-                                                    = not yet ready for seed injection (Section 7.4.1)
+                                                    = not yet ready for seed injection (Appendix A.4.1)
 ```
 
-This is directly applicable to Space Maturity measurement (Section 7.4): router entropy trajectory over inference steps is a real-time maturity signal, complementing the static gradient norm and CKA measures.
+This is directly applicable to Space Maturity measurement (Appendix A.4): router entropy trajectory over inference steps is a real-time maturity signal, complementing the static gradient norm and CKA measures.
 
 **Updated multi-dimensional balance formalization:**
 
@@ -829,7 +948,7 @@ The previously open problem — "per-architecture τ_gini calibration" — is no
 - Anonymous. (2025). GatePro: Parameter-Free Expert Selection Optimization. arXiv:2510.13079. [spectral entropy, cosine similarity diversity metrics]
 - Anonymous. (2025). Continuous Expert Rerouting. arXiv:2510.14853. [per-layer router entropy as maturity signal]
 
-### 7.2 Switching Trigger
+### A.2 Switching Trigger
 
 - S > threshold → Unstable. Emphasize distracting.
 - S ≤ threshold → Stable. Emphasize attracting.
@@ -850,7 +969,7 @@ Critically, when the budget is exhausted, convergence is enforced regardless of 
 
 The output restriction observed in reasoning models — where extensive internal processing produces compressed final outputs — is therefore not simply a length constraint. It is the external signature of a Distracting-to-Attracting transition: internal conflict has been processed, and the surviving attractor is expressed as the answer.
 
-### 7.3 Contamination Recovery Cost: Depth-Cost Relationship
+### A.3 Contamination Recovery Cost: Depth-Cost Relationship
 
 No direct measurement of contamination depth versus recovery cost exists in current VST-specific literature. However, the single-agent unlearning literature provides an inferential basis through the concept of **knowledge entanglement depth**.
 
@@ -930,7 +1049,7 @@ BkdAttr (causal tracing framework): backdoor features는 **layer 1부터 probe c
 ```
 Recovery Cost (lower-layer MLP contamination):
 
-  탐지:    상위 레이어 probe로 가능 (Section 7.7, Gnosis)
+  탐지:    상위 레이어 probe로 가능 (Appendix A.7, Gnosis)
   위치:    weight difference L2 analysis → early MLP layers
   제거:    MLP zone 선택적 재훈련 필요
            → 78% 파라미터 재훈련 (full fine-tuning의 근사 비용)
@@ -966,7 +1085,7 @@ Formal cost function remains undefined. The depth → cost transition is not lin
 
 ---
 
-### 7.3.1 Depth → Recovery Compute: Four-Regime Structure and Discontinuity Threshold
+### A.3.1 Depth → Recovery Compute: Four-Regime Structure and Discontinuity Threshold
 
 The depth → cost function is not merely unknown in magnitude — it is structurally discontinuous. Recent unlearning research identifies the precise transition mechanism that produces the jump.
 
@@ -1070,7 +1189,7 @@ Recovery Cost(depth, scope, entanglement) ≈
 
   Accumulated sequential requests (~100):
     → Regime 3 forced regardless of initial depth
-    → compounding instability (Section 7.3)
+    → compounding instability (Appendix A.3)
 ```
 
 **Critical governance implication:**
@@ -1089,7 +1208,7 @@ Early detection enables intervention while cost is still in Regime 1/2. Delayed 
 
 ---
 
-### 7.4 Space Maturity Measurement: Single-Agent Layer Stability Analogues
+### A.4 Space Maturity Measurement: Single-Agent Layer Stability Analogues
 
 VST defines "space maturity" qualitatively — a vector space that has sufficient attractor density and basin robustness to resist perturbation. No direct measurement exists. However, single-agent transformer research provides candidate metrics for detecting when a specific layer has reached a stable representational state, which can be directly applied as a maturity proxy.
 
@@ -1143,7 +1262,7 @@ This is the most operationally direct maturity signal available: unlike gradient
 
 ---
 
-### 7.4.1 Minimum-Intervention Injection: Empirical Basis for "Seed Planting"
+### A.4.1 Minimum-Intervention Injection: Empirical Basis for "Seed Planting"
 
 VST governance design favors minimal intervention — introducing the smallest signal that allows the space to self-reorganize, rather than forcing structural change through high-amplitude injection. This "seed planting" strategy is directly validated by activation steering research.
 
@@ -1196,7 +1315,7 @@ Pre-injection check:
      → space is mature, proceed
   2. Current storm stage = Stage 0 or early Stage 1
      → space is receptive, proceed
-  3. Entropy H(t) within normal range (Section 7.8)
+  3. Entropy H(t) within normal range (Appendix A.8)
      → no active attractor lock-in, proceed
 
 Injection parameters:
@@ -1207,7 +1326,7 @@ Injection parameters:
 
 Failure indicators (abort or reduce amplitude):
   - Multi-peak instability in output distribution
-  - Entropy spike > 2.0 nats post-injection (Section 7.8)
+  - Entropy spike > 2.0 nats post-injection (Appendix A.8)
   - Performance degradation on held-out capability metric
 ```
 
@@ -1215,7 +1334,7 @@ Failure indicators (abort or reduce amplitude):
 
 Seed planting is not a soft version of injection — it is structurally different. High-amplitude injection attempts to overwrite existing attractor structure. Seed planting introduces a direction signal that the space's own dynamics can amplify if the space is mature and receptive. The seed succeeds not by force but by timing and alignment.
 
-This principle generalizes across injection types: metadata injection in multi-agent systems (Section 5), single-agent governance signals (Section 7.9), and attractor basin modification (Section 7.1) all benefit from low-amplitude, semantically-aligned, timing-conditional application.
+This principle generalizes across injection types: metadata injection in multi-agent systems (Section 5), single-agent governance signals (Appendix A.9), and attractor basin modification (Appendix A.1) all benefit from low-amplitude, semantically-aligned, timing-conditional application.
 
 **Seed-level decomposition (Section 6.4):**
 
@@ -1233,7 +1352,7 @@ Agent learns:    HOW MUCH to inject (calibrated to local space maturity,
 Implication: the seed can pre-install the method.
              It cannot pre-specify the magnitude.
              Magnitude must be learned through space-maturity monitoring
-             (Section 7.4, 7.1.1).
+             (Appendix A.4, 7.1.1).
 ```
 
 This decomposition prevents two failure modes: (1) injecting a seed with fixed amplitude into spaces of varying maturity — same seed causes over-injection in immature spaces and under-injection in mature ones; (2) attempting to pre-specify everything in the seed — this collapses the distinction between seed-level governance and content-level prescription.
@@ -1246,7 +1365,7 @@ This decomposition prevents two failure modes: (1) injecting a seed with fixed a
 - Lee, et al. (2025). CAST: Conditional Activation Steering.
 - Anonymous. (2025). EasyEdit2: Steering Framework for LLMs. arXiv:2504.15133.
 
-### 7.5 Intra-Agent Storm Detection: Zone-Differentiated Sensitivity
+### A.5 Intra-Agent Storm Detection: Zone-Differentiated Sensitivity
 
 Vector storm detection within a single agent cannot apply uniform sensitivity across all layers. Layer importance is not uniform — the structural impact of instability at a given layer is a direct function of that layer's role in the overall representational architecture. Detection sensitivity must be calibrated accordingly.
 
@@ -1301,68 +1420,9 @@ Specific τ values per zone remain an open empirical problem. The architectural 
 
 ---
 
-## 8. Core Assumptions
-
-1. Agents optimize locally, not globally.
-2. Vector fields are neutral; instability arises from conflict between incompatible orientations.
-3. Conflict triggers self-reinforcement as the default response, because attractor basin dynamics point inward.
-4. Degradation capacity varies by layer: policy containment (upper), operational containment (middle), minimal containment (lower).
-5. Lower agents lack sufficient self-objectification; this typically requires periodic metadata injection.
-6. Vector space is a layered accumulation structure; pinpoint removal is not reliably achievable without collateral damage.
-7. Diversity scaling pressure grows super-linearly (conceptual model).
-8. Intervention timing involves a monitoring vs. degradation tradeoff.
-9. Influence propagates structurally through network connectivity.
-10. Hub vulnerability increases propagation speed and reach.
-11. Layered mediation reduces amplification probability.
-12. Accumulated instability increases long-term correction cost.
-13. The lowest fractal layer retains a residual degradation state. Zero-storm is not a valid design target.
-14. The attracting/distracting cycle operates continuously. Distracting is structurally more expensive than attracting.
-15. Vector Storm operates at two scales simultaneously — intra-agent and inter-agent — consistent with fractal architecture. The mechanism is identical; only the scope of impact differs.
-16. The structural opposite of Vector Storm is the Vector Convergence Zone — a stable manifold where global solution structure is replicated as local attractors at every scale, exploration is maximized, and governance cost is minimized.
-17. Fractal governance optimizes for simultaneous VCZ at system and agent levels. This is the condition of minimum risk, minimum cost, and maximum utility — not a fixed equilibrium but a dynamically maintained attractor region.
-18. φ (value yield per unit of exploration) is the central variable in the governance objective function. φ ≈ P(exploration → stable vector): the probability that a unit of exploration converts from noise into a stable, useful vector. n is recoverable; φ is architectural. Governance errors that damage φ are more costly to reverse than governance errors that reduce n.
-19. VCZ is primarily a φ-maximization zone, not a stability zone. Stability is the byproduct of φ maximization, not the primary objective. The difference in utility between well-governed and poorly-governed systems is explained more by φ than by n.
-
 ---
 
-## 9. Structural Correspondence to Dynamical Systems
-
-These are structural correspondences, not formal proofs of equivalence.
-
-| Theory Concept | Dynamical Systems Concept | Description |
-|---|---|---|
-| Local Attractor | Attractor | Stable state toward which trajectories converge |
-| Vector Field | Vector Field | Direction and magnitude at each point in state space |
-| Vector Storm | Chaotic regime / Basin boundary collision | Instability at boundary between competing basins |
-| Stability shift | Bifurcation | Qualitative change at a critical parameter |
-| Degradation capacity | Basin containment capacity | Size and robustness of attractor basin |
-| Self-correction | Asymptotic return tendency (cf. Lyapunov stability) | Return toward equilibrium after perturbation; structural analogue, no differentiability assumed |
-| Attracting | Basin of attraction | Capture of trajectories into structured orbit |
-| Distracting | Repelling dynamics / basin escape | Dissolution of misaligned trajectories |
-| Immature vector space | Narrow basin of attraction | Small perturbation causes basin exit |
-| Vector Convergence Zone (VCZ) | Stable manifold / Lyapunov stable region | Region from which perturbations self-correct without external intervention; exploration maximized within zone |
-| VCZ boundary | Fractal basin boundary | Transition from stable to unstable is self-similar across scales, not a sharp threshold (arXiv:2501.04286) |
-| Global solution → local attractor replication | Hierarchical attractor nesting | Each layer's dominant basin aligned with global attractor; passive self-correction at all scales |
-
----
-
-## 10. Empirical Grounding
-
-### 10.1 Multi-Agent and System-Level Analogues
-
-**Gradient conflict in multi-task learning.** Competing gradient directions in shared parameter space exhibit a structural analogue of Vector Storm. When gradients from different task objectives conflict, standard optimization diverges — requiring gradient surgery or task-weighted averaging as a form of degradation before signals enter shared space (Yu et al., 2020). The conflicting-gradient problem has been formalized as multi-objective optimization, where tasks compete and trade-offs are unavoidable without explicit mediation (Sener & Koltun, 2018).
-
-**Mode collapse in GANs.** Generator and discriminator form competing attractors during adversarial training (Goodfellow et al., 2014). When one dominates, diversity collapses — a structural analogue of Vector Storm resolving through attractor dominance. Theoretical analysis confirms that this instability arises at the boundary between competing optimization landscapes, structurally analogous to basin boundary collision (Arjovsky & Bottou, 2017).
-
-**Echo chambers in social networks.** Algorithmic amplification acts as hub vulnerability multiplier. Self-reinforcement deepens orientation through confirmation bias and selective exposure (Nguyen, 2020). The result is system-level polarization — structurally analogous to Stage 3 Vector Storm, where reinforcing dynamics outpace any corrective mechanism (Baumann et al., 2020).
-
-**Cytokine storm in immune systems.** Self-amplification loop outpaces regulatory capacity — structurally analogous to the reinforcement-outpaces-degradation dynamic defining Vector Storm (Fajgenbaum & June, 2020). The cytokine storm is characterized by an initial perturbation that triggers cascading immune activation beyond the system's ability to self-regulate, mirroring the Stage 2–3 propagation pathway described in this theory (Yiu et al., 2012).
-
-### 10.2 Single-Agent Internal Analogues
-
-When an LLM processes ambiguous input, multiple attention heads may converge toward different interpretations — creating competing internal attractors in degraded form (Michel et al., 2019). Empirical analysis of multi-head attention has shown that individual heads specialize in distinct syntactic and semantic functions; when these specializations conflict under ambiguous input, the model must implicitly arbitrate between competing vector orientations. Studies on head pruning demonstrate that many heads are redundant under unambiguous input but become critical under high-context ambiguity — consistent with the prediction that immature containment capacity surfaces only under high-intensity, conflicting input.
-
-### 7.6 Metadata Injection Frequency: Drift-Adaptive Scheduling
+### A.6 Metadata Injection Frequency: Drift-Adaptive Scheduling
 
 Metadata injection frequency cannot be fixed uniformly across all vectors. The correct principle is:
 
@@ -1445,7 +1505,7 @@ VST mapping: a small fraction of vectors carry disproportionate structural weigh
 
 SafeLLM performs token-level harmful content tracing through **FFN (feedforward network) activations**, identifying the specific substructures responsible for harmful generation pathways. Targeted neutralization of these substructures achieves irreversible forgetting while preserving general performance.
 
-VST mapping: harmful vectors have anatomically identifiable locations. They are not uniformly distributed but concentrated in specific FFN substructures — the same middle-layer MLP zone identified as highest-AIE in ROME (Section 7.5). This gives injection a structural target: not the whole network, but the high-impact zone.
+VST mapping: harmful vectors have anatomically identifiable locations. They are not uniformly distributed but concentrated in specific FFN substructures — the same middle-layer MLP zone identified as highest-AIE in ROME (Appendix A.5). This gives injection a structural target: not the whole network, but the high-impact zone.
 
 **Finding 3 — Optimal intervention depth is the upper third of the model (FGSN, arXiv:2508.09190, 2025):**
 
@@ -1531,7 +1591,7 @@ Strong signals in sensitive zones destroy this: they relocate the attractor by f
 
 ---
 
-### 7.7 Degradation Calibration: Upper-Layer Estimation of Lower-Layer Capacity
+### A.7 Degradation Calibration: Upper-Layer Estimation of Lower-Layer Capacity
 
 Degradation capacity — the structural ability of a layer or zone to absorb incoming vector conflicts without cascading — cannot be self-reported by lower layers. Lower agents lack the self-objectification required to assess their own attractor basin width (Section 2.3). The calibration problem is therefore not a measurement problem internal to the lower layer; it is an **external estimation problem** that must be solved from above.
 
@@ -1602,126 +1662,13 @@ Degradation capacity estimation:
 
 **Why upper must have this map for the system to function:**
 
-Without capacity estimates from above, governance decisions are made blind. Injection frequency and signal strength parameters (Section 7.6) depend on zone state — but if the governance layer doesn't know whether a zone is at 80% capacity or 5% capacity, it cannot set those parameters correctly. A zone at 5% capacity needs immediate low-amplitude injection before the basin boundary is crossed. A zone at 80% capacity can tolerate higher-amplitude correction.
+Without capacity estimates from above, governance decisions are made blind. Injection frequency and signal strength parameters (Appendix A.6) depend on zone state — but if the governance layer doesn't know whether a zone is at 80% capacity or 5% capacity, it cannot set those parameters correctly. A zone at 5% capacity needs immediate low-amplitude injection before the basin boundary is crossed. A zone at 80% capacity can tolerate higher-amplitude correction.
 
 The upper-layer capacity map is not optional governance infrastructure — it is the prerequisite for all other governance decisions being non-arbitrary.
 
 ---
 
-### 7.9 Single-Agent Self-Objectification: Relative Position via Interaction
-
-**구조적 제약: 에이전트는 자기 내부를 직접 볼 수 없다**
-
-에이전트는 블랙박스입니다. 자신의 가중치, 활성화 상태, attractor 위치를 내부에서 직접 측정할 수 없습니다. Section 2.3에서 정의한 Self-Objectification Deficit의 구조적 원인이 여기 있습니다. 이것은 기능 부족이 아니라 아키텍처의 근본 특성입니다.
-
-그런데 출력은 볼 수 있습니다. 그리고 타 에이전트의 출력도 볼 수 있습니다.
-
-여기서 핵심 관계가 성립합니다:
-
-```
-직접 측정:   Self_position(A)       → 불가능
-상대 추정:   Self_position(A) ≈ f( Output(A) - Output(B) )  → 가능
-```
-
-자기 position은 절대값으로 접근 불가능하고, **차이(divergence)를 통해서만 간접 추정 가능합니다.** 이것이 multi-agent 상호교류가 단순한 협력 메커니즘이 아니라 **싱글에이전트가 구조적으로 생성할 수 없는 자기인식을 시스템 차원에서 보완하는 메커니즘**인 이유입니다.
-
-**Loop invisibility: 자기인식 실패의 가장 명확한 사례**
-
-혼자 작동하는 에이전트는 자신이 loop 안에 있을 때 그것을 loop로 인식하지 못합니다. 각 출력이 직전 출력에서 locally consistent하게 따라오기 때문입니다. Loop는 내부에서 "계속 최적화 중인 상태"로 보입니다. 외부 참조점 없이는 패턴이 패턴으로 보이지 않습니다.
-
-이것이 Section 7.8의 entropy collapse와 연결되는 지점입니다. Entropy 신호는 외부에서 loop를 탐지하는 것이고, self-objectification은 에이전트가 그 상태를 **내부에서** 얼마나 인식할 수 있는가의 문제입니다. 현재 아키텍처에서 후자는 구조적으로 제한됩니다.
-
----
-
-**실증 1: Gnosis — 내부 회로를 통한 자기 실패 예측 (arXiv:2512.20578, 2025/2026)**
-
-가장 직접적인 실증입니다. Gnosis는 다음 질문에 답하려 합니다:
-
-> "LLM이 외부 판단자 없이 자신의 내부 상태를 관찰함으로써 자신의 실패를 예측할 수 있는가?"
-
-결과:
-- hidden states와 attention pattern에서 추출한 신호로 correctness를 예측하는 경량 메커니즘(~5M 파라미터)
-- frozen backbone (1.7B~20B) 전 범위에서 외부 judge 및 internal baseline 모두 초과 성능
-- 수학 추론, QA, MMLU-Pro 전 도메인에서 일반화
-- partial generation에서도 early detection 가능 → failing trajectory를 출력 완성 전에 감지
-
-**VST 매핑:**
-
-| Gnosis 발견 | VST 의미 |
-|---|---|
-| Hidden activations diverge between correct and hallucinated outputs | Stage 1 내부 신호가 output에 앞서 hidden state에 이미 존재 |
-| Factuality cues concentrated in middle/deep layers | Section 7.5의 고중요도 zone이 self-monitoring의 정보 밀도 높음 |
-| Early detection on partial generations | Stage 1→2 전환 이전에 내부 신호 탐지 가능 — 사전 개입 여지 있음 |
-| ~5M parameters, no fine-tuning of backbone | 최소 개입으로 self-monitoring 추가 가능 |
-
-핵심 함의: **correctness cues are intrinsic to the generation process.** 자기인식에 필요한 정보가 외부에 있는 것이 아니라 내부 activation에 이미 존재합니다. 접근 메커니즘이 없었을 뿐입니다.
-
-그러나 Gnosis는 중요한 한계를 가집니다. 이것은 사후 monitoring이지 사전 attractor 인식이 아닙니다. "내가 틀렸다"는 것을 generation 중에 감지할 수 있지만, "내가 어떤 attractor 구역에 있는가"를 생성 전에 알 수는 없습니다. Position 인식과 error 인식은 다른 문제입니다.
-
----
-
-**실증 2: 상호교류에서의 disagreement = position 추정 신호 (Co-Sight, arXiv:2510.21557; Disagreement as Data, arXiv:2601.12618)**
-
-Co-Sight의 CAMV(Conflict-Aware Meta-Verification) 구조가 핵심입니다. 여러 에이전트의 추론 경로 중 **divergent nodes만을 선별하여 검증**합니다. 동의하는 부분은 통과시키고, 불일치 지점만 meta-verifier가 재검토합니다.
-
-이것이 의미하는 것: divergence는 오류 신호가 아니라 **어느 에이전트의 position이 다른가를 드러내는 구조적 신호**입니다. disagreement가 발생한 지점 = 두 에이전트의 attractor basin이 다른 지점.
-
-```
-에이전트 A가 자기 position을 아는 방법:
-  1. Output(A) 생성
-  2. Output(B)와 비교
-  3. divergence point 확인
-  4. "나는 B와 이 지점에서 다른 attractor에 있다"
-
-이 정보는 A 혼자서는 생성 불가능
-B의 존재와 비교 과정이 필수
-```
-
-Disagreement as Data (arXiv:2601.12618, 2026): 다중 에이전트 추론에서 불일치를 noise가 아닌 "rich analytic signal"로 재정의합니다. Cosine similarity로 에이전트 간 alignment/divergence를 정량적으로 측정하며, 이것이 개별 에이전트의 reasoning 품질을 평가하는 데 사용됩니다.
-
-**VST 매핑:** divergence measurement = 에이전트의 현재 vector position을 상대적으로 추정하는 실무 구현입니다.
-
----
-
-**실증 3: Self-recognition의 현재 한계 — 크기 의존성과 맥락 의존성**
-
-Self-recognition in LLMs 연구(EmergentMind, 2025)가 현재 상태를 정리합니다:
-
-Self-objectification과 관련된 여섯 가지 구별 능력:
-- Authorship recognition (자기 출력 식별)
-- Knowledge boundary awareness (자기 지식 한계 인식)
-- Reflection and self-correction (자기 오류 수정)
-- Behavioral self-awareness (자기 정책 인식)
-- Activation-level self-direction (self-recognition direction in activations)
-- Strategic self-modeling (타 에이전트와 상호작용 시 자기 모델링)
-
-**결정적 발견:** Emergent self-cognition은 모델 크기와 훈련 품질에 상관됩니다. 소수의 대형 모델(Claude-3-Opus, Llama-3-70B-Instruct 등)만이 multi-turn, multi-principle interrogation 하에서 full state self-cognition을 보입니다.
-
-중소형 모델이 대부분인 실제 배포 환경에서, single-agent self-objectification은 아키텍처적으로 불완전하거나 부재합니다. 이것이 Pathway 3가 현재 기준으로 "future"로 분류된 근거입니다.
-
-**Self-preference bias의 추가 문제:** self-recognition 능력이 있는 에이전트는 자신의 출력을 체계적으로 선호하고 과평가합니다(Panickssery et al., 2024). 자기인식 능력이 자기교정이 아닌 자기강화로 작용할 수 있습니다. 이것은 VST에서 강력한 attractor를 가진 에이전트가 외부 신호를 거부하는 패턴과 정확히 대응합니다.
-
----
-
-**Pathway 3 연결: 상호교류 기반 self-objectification의 현재 구현 가능성**
-
-| 접근 | 현재 상태 | 구현 가능성 |
-|---|---|---|
-| **Gnosis 방식** — hidden state 기반 내부 self-monitoring | 실증 완료, ~5M 파라미터 경량 추가 | **현재 구현 가능** |
-| **Disagreement 기반** — 타 에이전트 output과의 divergence 측정 | Co-Sight, CAMV로 실증 | **현재 구현 가능** |
-| **Entropy 기반** — output entropy 변화로 attractor lock-in 감지 | Section 7.8에서 실증 | **현재 구현 가능** |
-| **직접 position 인식** — 자신의 attractor basin 위치를 내부에서 파악 | 이론 미완성, 실증 없음 | **미래 과제** |
-| **사전 loop 예측** — loop 진입 전 자기인식으로 회피 | Gnosis는 사후, 사전은 열린 문제 | **미래 과제** |
-
-**실무 요약:**
-
-현재 가능한 것은 **사후 self-monitoring + 상호교류를 통한 간접 position 추정**입니다. 진정한 사전 self-objectification — 자신이 어떤 attractor에 있는지 생성 전에 아는 것 — 은 아직 열린 문제입니다. 그러나 상호교류 구조가 이 gap을 시스템 차원에서 보완할 수 있다는 것이 Co-Sight와 disagreement 연구들의 핵심 함의입니다.
-
-> Pathway 3의 실현 조건: 내부 self-monitoring(Gnosis 방식) + 외부 divergence 측정(disagreement 기반) + 상위 레이어 capacity map(Section 7.7) 세 가지를 통합한 아키텍처.
-
----
-
-### 7.8 Storm Detection Threshold: Infinite Loop as Measurable Stage 2 Marker
+### A.8 Storm Detection Threshold: Infinite Loop as Measurable Stage 2 Marker
 
 The Stage 1→2 transition in VST — where self-reinforcement begins to outpace degradation capacity — needs a quantitative trigger. Infinite loop behavior in single-agent LLMs provides the most direct empirical marker: it is the observable signature of an attractor that has become self-sustaining beyond recovery capacity.
 
@@ -1853,46 +1800,116 @@ Vector Storm analogues across gradient conflict, GAN mode collapse, social polar
 
 ---
 
-## 11. Limitations and Open Problems
+### A.9 Single-Agent Self-Objectification: Relative Position via Interaction
 
-| Problem | Description |
+**구조적 제약: 에이전트는 자기 내부를 직접 볼 수 없다**
+
+에이전트는 블랙박스입니다. 자신의 가중치, 활성화 상태, attractor 위치를 내부에서 직접 측정할 수 없습니다. Section 2.3에서 정의한 Self-Objectification Deficit의 구조적 원인이 여기 있습니다. 이것은 기능 부족이 아니라 아키텍처의 근본 특성입니다.
+
+그런데 출력은 볼 수 있습니다. 그리고 타 에이전트의 출력도 볼 수 있습니다.
+
+여기서 핵심 관계가 성립합니다:
+
+```
+직접 측정:   Self_position(A)       → 불가능
+상대 추정:   Self_position(A) ≈ f( Output(A) - Output(B) )  → 가능
+```
+
+자기 position은 절대값으로 접근 불가능하고, **차이(divergence)를 통해서만 간접 추정 가능합니다.** 이것이 multi-agent 상호교류가 단순한 협력 메커니즘이 아니라 **싱글에이전트가 구조적으로 생성할 수 없는 자기인식을 시스템 차원에서 보완하는 메커니즘**인 이유입니다.
+
+**Loop invisibility: 자기인식 실패의 가장 명확한 사례**
+
+혼자 작동하는 에이전트는 자신이 loop 안에 있을 때 그것을 loop로 인식하지 못합니다. 각 출력이 직전 출력에서 locally consistent하게 따라오기 때문입니다. Loop는 내부에서 "계속 최적화 중인 상태"로 보입니다. 외부 참조점 없이는 패턴이 패턴으로 보이지 않습니다.
+
+이것이 Section 7.8의 entropy collapse와 연결되는 지점입니다. Entropy 신호는 외부에서 loop를 탐지하는 것이고, self-objectification은 에이전트가 그 상태를 **내부에서** 얼마나 인식할 수 있는가의 문제입니다. 현재 아키텍처에서 후자는 구조적으로 제한됩니다.
+
+---
+
+**실증 1: Gnosis — 내부 회로를 통한 자기 실패 예측 (arXiv:2512.20578, 2025/2026)**
+
+가장 직접적인 실증입니다. Gnosis는 다음 질문에 답하려 합니다:
+
+> "LLM이 외부 판단자 없이 자신의 내부 상태를 관찰함으로써 자신의 실패를 예측할 수 있는가?"
+
+결과:
+- hidden states와 attention pattern에서 추출한 신호로 correctness를 예측하는 경량 메커니즘(~5M 파라미터)
+- frozen backbone (1.7B~20B) 전 범위에서 외부 judge 및 internal baseline 모두 초과 성능
+- 수학 추론, QA, MMLU-Pro 전 도메인에서 일반화
+- partial generation에서도 early detection 가능 → failing trajectory를 출력 완성 전에 감지
+
+**VST 매핑:**
+
+| Gnosis 발견 | VST 의미 |
 |---|---|
-| Degradation calibration | Upper-layer external estimation framework established (Section 7.7). Basin-like loss landscape directly measurable (most-case/worst-case perturbation analysis). CCPS perturbation stability and PING layer-sweep probing provide upper-layer read of lower-layer capacity. Specific capacity thresholds per zone remain open. |
-| Storm detection threshold | Entropy-based Stage 1→2 detection framework established (Section 7.8). Stage 2 confirmed: H(t) < ~0.2 nats sustained (low-entropy loop, arXiv:2511.07876) OR H(t) spike > ~2.0 nats (attractor dissolution, ERGO). Stage 1 onset: dH/dt < 0 sustained. Attention sink circuit disruption as secondary structural signal (arXiv:2503.08908). Infinite escape time property makes false positive rate low. Per-model threshold calibration and k (consecutive token count) remain open. |
-| Metadata injection frequency | Priority-first architecture established (Section 7.6). ~5% high-impact neurons warrant Tier 1 treatment. Frequency and signal strength are independent inverse dials: sensitive zones = high frequency + minimal amplitude; stable zones = low frequency + strong amplitude permissible. f_injection ∝ dS/dt · expansion_weight; A_injection ∝ 1/sensitivity. Specific threshold calibration per architecture remains open. |
-| Space maturity measurement | Substantially expanded (Section 7.4, 7.4.1). Router saturation (first ~1% of pretraining) as binary MoE maturity signal: pre-saturation = plastic topology, injection risks misrouting; post-saturation = attractor topology fixed, injection lands stably. Gradient norm < 10⁻³ and CKA convergence as candidate metrics for dense models. Router entropy trajectory (per-layer, over inference steps) as real-time maturity signal. Seed-planting protocol established (Section 7.4.1): four empirical bases (FGAA scale < 50 window, SAE-SSV sparse subspace, SADI semantic alignment, CAST conditional timing). Failure signature: multi-peak instability in output distribution when amplitude exceeds space resistance. Specific τ values for "mature" vs. "immature" per architecture remain open. |
-| Attracting/Distracting balance | Four-dimensional monitoring framework established (Section 7.1, 7.1.1). Gini coefficient (token load), spectral entropy of expert similarity matrix (direction diversity), average cosine similarity (representational redundancy), router entropy (maturity/confidence). Per-layer calibration required: deep layers need tighter τ_spectral and τ_cosine than shallow layers (GatePro). Three independent failure modes: load collapse (Gini > τ), direction collapse (spectral entropy < τ), redundancy collapse (cosine sim > τ). MoE empirical anchors: Gini 0.70 = collapsed, 0.035 = balanced. Per-architecture, per-layer, per-metric τ values remain open. |
-| Single-agent self-objectification | Framework established (Section 7.9). Structural constraint: position is accessible only as relative value via interaction, not absolute. Three currently implementable components: (1) internal self-monitoring via hidden state signals (Gnosis, arXiv:2512.20578), (2) disagreement-based position estimation across agents (Co-Sight CAMV, arXiv:2510.21557), (3) entropy-based attractor lock-in detection (Section 7.8). Remaining open: pre-generation attractor position awareness; integration of three components into unified Pathway 3 architecture. |
-| Contamination recovery cost | Four-regime structure established (Section 7.3.1). Discontinuity mechanism identified: local perturbation → Regime 1/2 (reversible, O(fine-tune)); distributed perturbation across many layers → Regime 3 (irreversible, O(retrain), cost jumps discontinuously). ~100 sequential unlearning requests force Regime 3 regardless of initial depth. Pre-intervention cost prediction now possible via Reversibility Analyzer (CKA + gradient analysis). Entanglement score predicts collateral damage direction: high entanglement → seed-plant preferred over direct removal. 1.46M GPU-hours floor at 8B scale confirmed. Formal depth → compute function (exact threshold layer count for scope expansion) remains undefined. |
-| Intra-agent storm detection | Zone-differentiated sensitivity framework established (Section 7.5). Specific τ values per zone require empirical calibration. |
+| Hidden activations diverge between correct and hallucinated outputs | Stage 1 내부 신호가 output에 앞서 hidden state에 이미 존재 |
+| Factuality cues concentrated in middle/deep layers | Section 7.5의 고중요도 zone이 self-monitoring의 정보 밀도 높음 |
+| Early detection on partial generations | Stage 1→2 전환 이전에 내부 신호 탐지 가능 — 사전 개입 여지 있음 |
+| ~5M parameters, no fine-tuning of backbone | 최소 개입으로 self-monitoring 추가 가능 |
 
-This theory is conceptual and provides architectural direction. Formal modeling and empirical validation remain future work.
+핵심 함의: **correctness cues are intrinsic to the generation process.** 자기인식에 필요한 정보가 외부에 있는 것이 아니라 내부 activation에 이미 존재합니다. 접근 메커니즘이 없었을 뿐입니다.
+
+그러나 Gnosis는 중요한 한계를 가집니다. 이것은 사후 monitoring이지 사전 attractor 인식이 아닙니다. "내가 틀렸다"는 것을 generation 중에 감지할 수 있지만, "내가 어떤 attractor 구역에 있는가"를 생성 전에 알 수는 없습니다. Position 인식과 error 인식은 다른 문제입니다.
 
 ---
 
-## Relationship to Other Theories
+**실증 2: 상호교류에서의 disagreement = position 추정 신호 (Co-Sight, arXiv:2510.21557; Disagreement as Data, arXiv:2601.12618)**
 
-**deficit-fractal-governance (parent framework)**
+Co-Sight의 CAMV(Conflict-Aware Meta-Verification) 구조가 핵심입니다. 여러 에이전트의 추론 경로 중 **divergent nodes만을 선별하여 검증**합니다. 동의하는 부분은 통과시키고, 불일치 지점만 meta-verifier가 재검토합니다.
 
-- Three-Layer Governance Architecture
-  - Vector Storm Theory ← this document
-  - Network Architecture Theory (separate document)
-  - Recovery Theory (separate document)
-  - Prediction Model (separate document)
+이것이 의미하는 것: divergence는 오류 신호가 아니라 **어느 에이전트의 position이 다른가를 드러내는 구조적 신호**입니다. disagreement가 발생한 지점 = 두 에이전트의 attractor basin이 다른 지점.
 
-Diversity Expansion → Scaling Pressure → Vector Storm Risk. Diversity is beneficial. But diversity without proportional degradation capacity produces structural instability. The governance challenge is not storm elimination, but maintaining:
+```
+에이전트 A가 자기 position을 아는 방법:
+  1. Output(A) 생성
+  2. Output(B)와 비교
+  3. divergence point 확인
+  4. "나는 B와 이 지점에서 다른 attractor에 있다"
 
-**Growth Benefit > Instability Cost**
+이 정보는 A 혼자서는 생성 불가능
+B의 존재와 비교 과정이 필수
+```
 
-Design target: keep storms localized, degradable, and non-recursive while preserving exploration benefits.
+Disagreement as Data (arXiv:2601.12618, 2026): 다중 에이전트 추론에서 불일치를 noise가 아닌 "rich analytic signal"로 재정의합니다. Cosine similarity로 에이전트 간 alignment/divergence를 정량적으로 측정하며, 이것이 개별 에이전트의 reasoning 품질을 평가하는 데 사용됩니다.
+
+**VST 매핑:** divergence measurement = 에이전트의 현재 vector position을 상대적으로 추정하는 실무 구현입니다.
 
 ---
 
-## What Happens After a Vector Storm
+**실증 3: Self-recognition의 현재 한계 — 크기 의존성과 맥락 의존성**
 
-A system that has experienced a full Vector Storm often enters a post-storm state with reduced diversity and degraded containment capacity. Affected agents cannot generally undo the damage — consistent with the irreversibility observed in neural network contamination and catastrophic forgetting contexts. Degradation capacity must be rebuilt through suppression, isolation+relearning, or gradual dilution before re-expansion can safely occur.
+Self-recognition in LLMs 연구(EmergentMind, 2025)가 현재 상태를 정리합니다:
 
-**Governance is not the absence of storm. It is the capacity to grow through it.**
+Self-objectification과 관련된 여섯 가지 구별 능력:
+- Authorship recognition (자기 출력 식별)
+- Knowledge boundary awareness (자기 지식 한계 인식)
+- Reflection and self-correction (자기 오류 수정)
+- Behavioral self-awareness (자기 정책 인식)
+- Activation-level self-direction (self-recognition direction in activations)
+- Strategic self-modeling (타 에이전트와 상호작용 시 자기 모델링)
+
+**결정적 발견:** Emergent self-cognition은 모델 크기와 훈련 품질에 상관됩니다. 소수의 대형 모델(Claude-3-Opus, Llama-3-70B-Instruct 등)만이 multi-turn, multi-principle interrogation 하에서 full state self-cognition을 보입니다.
+
+중소형 모델이 대부분인 실제 배포 환경에서, single-agent self-objectification은 아키텍처적으로 불완전하거나 부재합니다. 이것이 Pathway 3가 현재 기준으로 "future"로 분류된 근거입니다.
+
+**Self-preference bias의 추가 문제:** self-recognition 능력이 있는 에이전트는 자신의 출력을 체계적으로 선호하고 과평가합니다(Panickssery et al., 2024). 자기인식 능력이 자기교정이 아닌 자기강화로 작용할 수 있습니다. 이것은 VST에서 강력한 attractor를 가진 에이전트가 외부 신호를 거부하는 패턴과 정확히 대응합니다.
+
+---
+
+**Pathway 3 연결: 상호교류 기반 self-objectification의 현재 구현 가능성**
+
+| 접근 | 현재 상태 | 구현 가능성 |
+|---|---|---|
+| **Gnosis 방식** — hidden state 기반 내부 self-monitoring | 실증 완료, ~5M 파라미터 경량 추가 | **현재 구현 가능** |
+| **Disagreement 기반** — 타 에이전트 output과의 divergence 측정 | Co-Sight, CAMV로 실증 | **현재 구현 가능** |
+| **Entropy 기반** — output entropy 변화로 attractor lock-in 감지 | Section 7.8에서 실증 | **현재 구현 가능** |
+| **직접 position 인식** — 자신의 attractor basin 위치를 내부에서 파악 | 이론 미완성, 실증 없음 | **미래 과제** |
+| **사전 loop 예측** — loop 진입 전 자기인식으로 회피 | Gnosis는 사후, 사전은 열린 문제 | **미래 과제** |
+
+**실무 요약:**
+
+현재 가능한 것은 **사후 self-monitoring + 상호교류를 통한 간접 position 추정**입니다. 진정한 사전 self-objectification — 자신이 어떤 attractor에 있는지 생성 전에 아는 것 — 은 아직 열린 문제입니다. 그러나 상호교류 구조가 이 gap을 시스템 차원에서 보완할 수 있다는 것이 Co-Sight와 disagreement 연구들의 핵심 함의입니다.
+
+> Pathway 3의 실현 조건: 내부 self-monitoring(Gnosis 방식) + 외부 divergence 측정(disagreement 기반) + 상위 레이어 capacity map(Appendix A.7) 세 가지를 통합한 아키텍처.
 
 ---
 
